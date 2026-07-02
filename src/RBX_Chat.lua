@@ -154,7 +154,7 @@ function UILibrary:CreateAudioPlayer(id, title, parent)
     titleLbl.Size = UDim2.new(1, -52, 0, 14)
     titleLbl.Position = UDim2.new(0, 44, 0, 10)
     titleLbl.BackgroundTransparency = 1
-    titleLbl.Text = getgenv().AudioNames[tostring(id)] or "Carregando..."
+    titleLbl.Text = getgenv().AudioNames[tostring(id)] or "Carregando Informações..."
     titleLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
     titleLbl.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
     titleLbl.TextSize = 12
