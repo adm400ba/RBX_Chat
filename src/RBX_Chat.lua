@@ -66,6 +66,11 @@ if not isfile("RBX_Chat/assets/send-horizontal.png") then
     writefile("RBX_Chat/assets/send-horizontal.png", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/send-horizontal.png"))
 end
 
+if not isfile("RBX_Chat/assets/send.png") then
+    SendNotification("RBX Chat", "Baixando asset ''send.png''...", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
+    writefile("RBX_Chat/assets/send.png", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/send.png"))
+end
+
 if not isfile("RBX_Chat/assets/close.png") then
     SendNotification("RBX Chat", "Baixando asset ''close.png''...", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
     writefile("RBX_Chat/assets/close.png", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/close.png"))
@@ -946,7 +951,7 @@ LMG2L["SendMessage_1c"]["AutoLocalize"] = false
 LMG2L["SendMessage_1c"]["AutoButtonColor"] = false
 LMG2L["SendMessage_1c"]["BackgroundTransparency"] = 0.5
 LMG2L["SendMessage_1c"]["BackgroundColor3"] = Color3.fromRGB(51, 51, 51)
-LMG2L["SendMessage_1c"]["Image"] = getcustomasset("RBX_Chat/assets/send-horizontal.png")
+LMG2L["SendMessage_1c"]["Image"] = getcustomasset("RBX_Chat/assets/send.png")
 LMG2L["SendMessage_1c"]["Size"] = UDim2.new(0, 30, 0, 30)
 LMG2L["SendMessage_1c"]["Name"] = "SendMessage"
 LMG2L["SendMessage_1c"]["Position"] = UDim2.new(0, 374, 0, 210)
