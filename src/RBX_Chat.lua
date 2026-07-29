@@ -18,6 +18,26 @@ local function SendNotification(title, content, duration, image)
     })
 end
 
+local function FormatMarkdown(text)
+    if not text then return "" end
+    
+    text = text:gsub("%*%*(.-)%*%*", "<b>%1</b>")
+    text = text:gsub("__(.-)__", "<u>%1</u>")
+    text = text:gsub("%*(.-)%*", "<i>%1</i>")
+    text = text:gsub("_(.-)_", "<i>%1</i>")
+    text = text:gsub("~~(.-)~~", "<s>%1</s>")
+    
+    text = text:gsub("%[color=([^%]]+)%](.-)%[/color%]", '<font color="%1">%2</font>')
+    text = text:gsub("%[size=(%d+)%](.-)%[/size%]", '<font size="%1">%2</font>')
+    text = text:gsub("%[font=([^%]]+)%](.-)%[/font%]", '<font face="%1">%2</font>')
+    text = text:gsub("%[weight=([^%]]+)%](.-)%[/weight%]", '<font weight="%1">%2</font>')
+    text = text:gsub("%[stroke=([^%]]+)%](.-)%[/stroke%]", '<stroke color="%1" joins="miter" thickness="1.5">%2</stroke>')
+    text = text:gsub("%[uc%](.-)%[/uc%]", "<uppercase>%1</uppercase>")
+    text = text:gsub("%[sc%](.-)%[/sc%]", "<sc>%1</sc>")
+    
+    return text
+end
+
 local function MakeFolder(name)
 if not isfolder(name) then
     makefolder(name)
@@ -1288,7 +1308,7 @@ local function ReceiveMessage(username, userId, text, timestamp)
     if textOnly == "" then
         NewMessage.MessageContent.Text.Visible = false
     else
-        NewMessage.MessageContent.Text.Text = textOnly
+        NewMessage.MessageContent.Text.Text = FormatMarkdown(textOnly)
     end
 
     local AttachmentContainer = Instance.new("Frame", NewMessage.MessageContent)
