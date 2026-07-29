@@ -1113,11 +1113,19 @@ task.spawn(function()
     end
 end)
 
-local function ReceiveMessage(username, userId, text, timeStr)
+local function ReceiveMessage(username, userId, text, timestamp)
     local NewMessage = MessageTemplate:Clone()
+
     NewMessage.Username.Text = username
     NewMessage.Thumbnail.Image = "rbxthumb://type=AvatarHeadShot&id=" .. tostring(userId) .. "&w=420&h=420"
-    NewMessage.Username.Time.Text = timeStr or os.date("%H:%M")
+
+    if timestamp then
+        local utc = DateTime.fromIsoDate(timestamp)
+        local localTime = utc:ToLocalTime()
+        NewMessage.Username.Time.Text = string.format("%02d:%02d", localTime.Hour, localTime.Minute)
+    else
+        NewMessage.Username.Time.Text = os.date("%H:%M")
+    end
 
     task.spawn(function()
         ContentProvider:PreloadAsync({NewMessage.Thumbnail}, function(contentId, status)
@@ -1330,7 +1338,7 @@ local function ConnectWebSocket()
             LMG2L["Loading_17"]["Visible"] = false
             local s, data = pcall(function() return HttpService:JSONDecode(msg) end)
             if s and data.username and data.text then
-                ReceiveMessage(data.username, data.userId, data.text, data.time)
+                ReceiveMessage(data.username, data.userId, data.text, data.timestamp)
             end
         end)
         
@@ -1370,7 +1378,7 @@ LMG2L["SendMessage_1c"].MouseButton1Click:Connect(function()
                 username = Player.DisplayName,
                 userId = Player.UserId,
                 text = Text,
-                time = os.date("%H:%M")
+                timestamp = DateTime.now():ToIsoDate()
             }
             
             local success, err = pcall(function()
@@ -1385,7 +1393,7 @@ LMG2L["SendMessage_1c"].MouseButton1Click:Connect(function()
         else
             LMG2L["Loading_17"]["Visible"] = false
             SendNotification("RBX Chat", "Modo Offline ativo. Servidor indisponível.", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-            ReceiveMessage(Player.DisplayName, Player.UserId, Text, os.date("%H:%M"))
+            ReceiveMessage(Player.DisplayName, Player.UserId, Text, DateTime.now():ToIsoDate())
         end
         
         LMG2L["TextBox_19"].Text = ""
