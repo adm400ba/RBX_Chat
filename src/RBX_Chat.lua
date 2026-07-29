@@ -11,128 +11,69 @@ local Player = Players.LocalPlayer
 
 local function SendNotification(title, content, duration, image)
     StarterGui:SetCore("SendNotification", {
-        Title = title or "Notification",
+        Title = title or "",
         Text = content or "",
         Duration = duration or 5,
         Icon = image
     })
 end
 
-if not isfolder("RBX_Chat") then
-    makefolder("RBX_Chat")
+local function MakeFolder(name)
+if not isfolder(name) then
+    makefolder(name)
+end
 end
 
-if not isfolder("RBX_Chat/assets") then
-    makefolder("RBX_Chat/assets")
+local function PreDownloadAsset(name)
+writefile("RBX_Chat/assets/" .. name, game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/" .. name))
 end
 
-writefile("RBX_Chat/assets/message-square-more.png", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/message-square-more.png"))
-
-if not isfolder("RBX_Chat/stickers") then
-    makefolder("RBX_Chat/stickers")
+local function DownloadAsset(name)
+if not isfile("RBX_Chat/assets/" .. name) then
+    SendNotification("RBX Chat", 'Baixando asset "' .. name .. '"...', 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
+    writefile("RBX_Chat/assets/" .. name, game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/" .. name))
+end
 end
 
-if not isfolder("RBX_Chat/audios") then
-    makefolder("RBX_Chat/audios")
+local function PreDownloadLuaFile(path)
+    writefile("RBX_Chat/" .. path, game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/" .. path))
 end
 
-if not isfile("RBX_Chat/assets/clipboard-copy.png") then
-    SendNotification("RBX Chat", "Baixando asset ''clipboard-copy.png''...", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-    writefile("RBX_Chat/assets/clipboard-copy.png", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/clipboard-copy.png"))
+local function DownloadLuaFile(path)
+    if not isfile("RBX_Chat/" .. path) then
+        SendNotification("RBX Chat", 'Baixando arquivo "' .. path:match("[^/]+$") .. '"...', 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
+        writefile("RBX_Chat/" .. path, game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/" .. path))
+    end
 end
 
-if not isfile("RBX_Chat/assets/loading.png") then
-    SendNotification("RBX Chat", "Baixando asset ''loading.png''...", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-    writefile("RBX_Chat/assets/loading.png", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/loading.png"))
-end
+MakeFolder("RBX_Chat")
+MakeFolder("RBX_Chat/assets")
 
-if not isfile("RBX_Chat/assets/message-square-more.png") then
-    SendNotification("RBX Chat", "Baixando asset ''message-square-more.png''...", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-    writefile("RBX_Chat/assets/message-square-more.png", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/message-square-more.png"))
-end
+PreDownloadAsset("message-square-more.png")
 
-if not isfile("RBX_Chat/assets/minus.png") then
-    SendNotification("RBX Chat", "Baixando asset ''minus.png''...", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-    writefile("RBX_Chat/assets/minus.png", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/minus.png"))
-end
+MakeFolder("RBX_Chat/stickers")
+MakeFolder("RBX_Chat/audios")
 
-if not isfile("RBX_Chat/assets/plus.png") then
-    SendNotification("RBX Chat", "Baixando asset ''plus.png''...", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-    writefile("RBX_Chat/assets/plus.png", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/plus.png"))
-end
+DownloadAsset("clipboard-copy.png")
+DownloadAsset("loading.png")
+DownloadAsset("minus.png")
+DownloadAsset("plus.png")
+DownloadAsset("send-horizontal.png")
+DownloadAsset("send.png")
+DownloadAsset("close.png")
+DownloadAsset("circle-play.png")
+DownloadAsset("circle-pause.png")
+DownloadAsset("step-back.png")
+DownloadAsset("arrow-left.png")
+DownloadAsset("audio-lines.png")
+DownloadAsset("sticker.png")
+DownloadAsset("search.png")
 
-if not isfile("RBX_Chat/assets/send-horizontal.png") then
-    SendNotification("RBX Chat", "Baixando asset ''send-horizontal.png''...", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-    writefile("RBX_Chat/assets/send-horizontal.png", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/send-horizontal.png"))
-end
+PreDownloadLuaFile("stickers/Stickers.lua")
+DownloadLuaFile("stickers/More-Stickers.lua")
 
-if not isfile("RBX_Chat/assets/send.png") then
-    SendNotification("RBX Chat", "Baixando asset ''send.png''...", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-    writefile("RBX_Chat/assets/send.png", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/send.png"))
-end
-
-if not isfile("RBX_Chat/assets/close.png") then
-    SendNotification("RBX Chat", "Baixando asset ''close.png''...", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-    writefile("RBX_Chat/assets/close.png", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/close.png"))
-end
-
-if not isfile("RBX_Chat/assets/circle-play.png") then
-    SendNotification("RBX Chat", "Baixando asset ''circle-play.png''...", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-    writefile("RBX_Chat/assets/circle-play.png", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/circle-play.png"))
-end
-
-if not isfile("RBX_Chat/assets/circle-pause.png") then
-    SendNotification("RBX Chat", "Baixando asset ''circle-pause.png''...", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-    writefile("RBX_Chat/assets/circle-pause.png", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/circle-pause.png"))
-end
-
-if not isfile("RBX_Chat/assets/step-back.png") then
-    SendNotification("RBX Chat", "Baixando asset ''step-back.png''...", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-    writefile("RBX_Chat/assets/step-back.png", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/step-back.png"))
-end
-
-if not isfile("RBX_Chat/assets/arrow-left.png") then
-    SendNotification("RBX Chat", "Baixando asset ''arrow-left.png''...", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-    writefile("RBX_Chat/assets/arrow-left.png", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/arrow-left.png"))
-end
-
-if not isfile("RBX_Chat/assets/audio-lines.png") then
-    SendNotification("RBX Chat", "Baixando asset ''audio-lines.png''...", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-    writefile("RBX_Chat/assets/audio-lines.png", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/audio-lines.png"))
-end
-
-if not isfile("RBX_Chat/assets/sticker.png") then
-    SendNotification("RBX Chat", "Baixando asset ''sticker.png''...", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-    writefile("RBX_Chat/assets/sticker.png", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/sticker.png"))
-end
-
-if not isfile("RBX_Chat/stickers/Stickers.lua") then
-    SendNotification("RBX Chat", "Baixando arquivo ''Stickers.lua''...", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-    writefile("RBX_Chat/stickers/Stickers.lua", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/stickers/Stickers.lua"))
-end
-
-if isfile("RBX_Chat/stickers/Stickers.lua") then
-    writefile("RBX_Chat/stickers/Stickers.lua", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/stickers/Stickers.lua"))
-end
-
-if not isfile("RBX_Chat/stickers/More-Stickers.lua") then
-    SendNotification("RBX Chat", "Baixando arquivo ''More-Stickers.lua''...", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-    writefile("RBX_Chat/stickers/More-Stickers.lua", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/stickers/More-Stickers.lua"))
-end
-
-if not isfile("RBX_Chat/audios/Audios.lua") then
-    SendNotification("RBX Chat", "Baixando arquivo ''Audios.lua''...", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-    writefile("RBX_Chat/audios/Audios.lua", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/audios/Audios.lua"))
-end
-
-if isfile("RBX_Chat/audios/Audios.lua") then
-    writefile("RBX_Chat/audios/Audios.lua", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/audios/Audios.lua"))
-end
-
-if not isfile("RBX_Chat/audios/More-Audios.lua") then
-    SendNotification("RBX Chat", "Baixando arquivo ''More-Audios.lua''...", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-    writefile("RBX_Chat/audios/More-Audios.lua", game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/audios/More-Audios.lua"))
-end
+PreDownloadLuaFile("audios/Audios.lua")
+DownloadLuaFile("audios/More-Audios.lua")
 
 if getgenv().Running == true then SendNotification("RBX Chat", "RBX Chat já está rodando.", 5, getcustomasset("RBX_Chat/assets/message-square-more.png")) return end
 getgenv().Running = true
@@ -583,7 +524,7 @@ LMG2L["StickerScroll_21"]["ScrollingDirection"] = Enum.ScrollingDirection.Y
 LMG2L["StickerGrid_22"] = Instance.new("UIGridLayout", LMG2L["StickerScroll_21"])
 LMG2L["StickerGrid_22"]["CellSize"] = UDim2.new(0, 50, 0, 50)
 LMG2L["StickerGrid_22"]["CellPadding"] = UDim2.new(0, 8, 0, 8)
-LMG2L["StickerGrid_22"]["HorizontalAlignment"] = Enum.HorizontalAlignment.Center
+LMG2L["StickerGrid_22"]["HorizontalAlignment"] = Enum.HorizontalAlignment.Left
 
 LMG2L["StickerPadding_23"] = Instance.new("UIPadding", LMG2L["StickerScroll_21"])
 LMG2L["StickerPadding_23"]["PaddingTop"] = UDim.new(0, 8)
@@ -615,29 +556,6 @@ AudioListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 local AudioPadding = Instance.new("UIPadding", AudioScroll)
 AudioPadding.PaddingTop = UDim.new(0, 8)
 AudioPadding.PaddingBottom = UDim.new(0, 8)
-
-BtnStickers.MouseButton1Click:Connect(function()
-    MenuSelection.Visible = false
-    HeaderTitle.Text = "Figurinhas"
-    HeaderFrame.Visible = true
-    LMG2L["StickerScroll_21"].Visible = true
-    AudioScroll.Visible = false
-end)
-
-BtnAudios.MouseButton1Click:Connect(function()
-    MenuSelection.Visible = false
-    HeaderTitle.Text = "Áudios"
-    HeaderFrame.Visible = true
-    LMG2L["StickerScroll_21"].Visible = false
-    AudioScroll.Visible = true
-end)
-
-BackBtn.MouseButton1Click:Connect(function()
-    HeaderFrame.Visible = false
-    LMG2L["StickerScroll_21"].Visible = false
-    AudioScroll.Visible = false
-    MenuSelection.Visible = true
-end)
 
 local function AddAudioTabItem(id, customName)
     local frame = Instance.new("TextButton", AudioScroll)
@@ -874,6 +792,42 @@ LMG2L["TextLabel_18"]["Size"] = UDim2.new(0, 72, 0, 36)
 LMG2L["TextLabel_18"]["Text"] = "RBX Chat"
 LMG2L["TextLabel_18"]["Position"] = UDim2.new(0, 12, 0, 0)
 
+LMG2L["StatusIndicator"] = Instance.new("Frame", LMG2L["MainFrame_3"])
+LMG2L["StatusIndicator"]["BackgroundColor3"] = Color3.fromRGB(254, 226, 226)
+LMG2L["StatusIndicator"]["BorderSizePixel"] = 0
+LMG2L["StatusIndicator"]["Size"] = UDim2.new(0, 8, 0, 8)
+LMG2L["StatusIndicator"]["Position"] = UDim2.new(0, 88, 0, 14)
+
+local StatusCorner = Instance.new("UICorner", LMG2L["StatusIndicator"])
+StatusCorner.CornerRadius = UDim.new(1, 0)
+
+LMG2L["SearchToggleBtn"] = Instance.new("ImageButton", LMG2L["MainFrame_3"])
+LMG2L["SearchToggleBtn"]["BackgroundTransparency"] = 1
+LMG2L["SearchToggleBtn"]["Image"] = getcustomasset("RBX_Chat/assets/search.png")
+LMG2L["SearchToggleBtn"]["Size"] = UDim2.new(0, 18, 0, 18)
+LMG2L["SearchToggleBtn"]["Position"] = UDim2.new(0, 102, 0, 9)
+
+LMG2L["SearchBox"] = Instance.new("TextBox", LMG2L["MainFrame_3"])
+LMG2L["SearchBox"]["BackgroundColor3"] = Color3.fromRGB(40, 40, 40)
+LMG2L["SearchBox"]["BackgroundTransparency"] = 0.5
+LMG2L["SearchBox"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
+LMG2L["SearchBox"]["PlaceholderText"] = "Pesquisar..."
+LMG2L["SearchBox"]["PlaceholderColor3"] = Color3.fromRGB(151, 151, 151)
+LMG2L["SearchBox"]["Text"] = ""
+LMG2L["SearchBox"]["Visible"] = false
+LMG2L["SearchBox"]["TextSize"] = 13
+LMG2L["SearchBox"]["FontFace"] = Font.new("rbxasset://fonts/families/BuilderSans.json")
+LMG2L["SearchBox"]["ClearTextOnFocus"] = false
+LMG2L["SearchBox"]["Size"] = UDim2.new(0, 140, 0, 24)
+LMG2L["SearchBox"]["Position"] = UDim2.new(0, 126, 0, 6)
+
+local SearchBoxCorner = Instance.new("UICorner", LMG2L["SearchBox"])
+SearchBoxCorner.CornerRadius = UDim.new(0, 4)
+
+local SearchBoxStroke = Instance.new("UIStroke", LMG2L["SearchBox"])
+SearchBoxStroke.Color = Color3.fromRGB(63, 63, 63)
+SearchBoxStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
 LMG2L["NewMessagesBtn"] = Instance.new("TextButton", LMG2L["MainFrame_3"])
 LMG2L["NewMessagesBtn"]["BorderSizePixel"] = 0
 LMG2L["NewMessagesBtn"]["TextSize"] = 13
@@ -882,7 +836,7 @@ LMG2L["NewMessagesBtn"]["BackgroundColor3"] = Color3.fromRGB(255, 95, 95)
 LMG2L["NewMessagesBtn"]["FontFace"] = Font.new("rbxasset://fonts/families/BuilderSans.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
 LMG2L["NewMessagesBtn"]["Size"] = UDim2.new(0, 166, 0, 18)
 LMG2L["NewMessagesBtn"]["Visible"] = false
-LMG2L["NewMessagesBtn"]["Position"] = UDim2.new(0, 90, 0, 9)
+LMG2L["NewMessagesBtn"]["Position"] = UDim2.new(0, 6, 0, 40)
 LMG2L["NewMessagesBtn"]["AutomaticSize"] = Enum.AutomaticSize.X
 
 LMG2L["NewMessagesBtn_Corner"] = Instance.new("UICorner", LMG2L["NewMessagesBtn"])
@@ -969,8 +923,34 @@ MessageTemplate.Parent = nil
 local ws
 local UnreadMessagesCount = 0
 local FirstUnreadTime = ""
+
 local isConnecting = false
 local ConnectionID = 0
+local ConnectionTimeout = 0
+
+task.spawn(function()
+    while task.wait(1) do
+        if isConnecting then
+            ConnectionTimeout = ConnectionTimeout + 1
+            if ConnectionTimeout > 8 then
+                isConnecting = false
+                ConnectionTimeout = 0
+            end
+        else
+            ConnectionTimeout = 0
+        end
+    end
+end)
+
+local function SetStatus(state)
+    if state == "Online" then
+        LMG2L["StatusIndicator"].BackgroundColor3 = Color3.fromRGB(209, 250, 229)
+    elseif state == "Connecting" then
+        LMG2L["StatusIndicator"].BackgroundColor3 = Color3.fromRGB(254, 243, 199)
+    else
+        LMG2L["StatusIndicator"].BackgroundColor3 = Color3.fromRGB(254, 226, 226)
+    end
+end
 
 LMG2L["MinimizeToggle_2"].MouseButton1Click:Connect(function()
     LMG2L["MainFrame_3"].Visible = not LMG2L["MainFrame_3"].Visible
@@ -983,6 +963,167 @@ LMG2L["StickerButton_1f"].MouseButton1Click:Connect(function()
     else
         LMG2L["StickerButton_1f"].Image = getcustomasset("RBX_Chat/assets/plus.png")
     end
+end)
+
+local isSearching = false
+local savedChatScroll = Vector2.new(0, 0)
+local savedStickerScroll = Vector2.new(0, 0)
+local savedAudioScroll = Vector2.new(0, 0)
+
+local ChatNoResults = Instance.new("TextLabel", LMG2L["MainFrame_3"])
+ChatNoResults.Name = "NoResultsLabel"
+ChatNoResults.Size = UDim2.new(1, 0, 0, 30)
+ChatNoResults.Position = UDim2.new(0, 0, 0.5, -15)
+ChatNoResults.BackgroundTransparency = 1
+ChatNoResults.Text = "Nenhum resultado encontrado."
+ChatNoResults.TextColor3 = Color3.fromRGB(180, 180, 180)
+ChatNoResults.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+ChatNoResults.TextSize = 14
+ChatNoResults.Visible = false
+ChatNoResults.ZIndex = 10
+
+local MenuNoResults = Instance.new("TextLabel", LMG2L["StickerMenu_20"])
+MenuNoResults.Name = "NoResultsLabel"
+MenuNoResults.Size = UDim2.new(1, 0, 0, 30)
+MenuNoResults.Position = UDim2.new(0, 0, 0.5, -15)
+MenuNoResults.BackgroundTransparency = 1
+MenuNoResults.Text = "Nenhum resultado encontrado."
+MenuNoResults.TextColor3 = Color3.fromRGB(180, 180, 180)
+MenuNoResults.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+MenuNoResults.TextSize = 12
+MenuNoResults.Visible = false
+MenuNoResults.ZIndex = 10
+
+local function UpdateSearch()
+    local query = string.lower(LMG2L["SearchBox"].Text)
+    
+    if query ~= "" and not isSearching then
+        isSearching = true
+        savedChatScroll = LMG2L["ScrollingFrame_4"].CanvasPosition
+        savedStickerScroll = LMG2L["StickerScroll_21"].CanvasPosition
+        savedAudioScroll = AudioScroll.CanvasPosition
+    end
+    
+    local chatResultsCount = 0
+    for _, child in ipairs(LMG2L["ScrollingFrame_4"]:GetChildren()) do
+        if child:IsA("Frame") and child.Name == "MessageFrame" then
+            if query == "" then
+                child.Visible = true
+                chatResultsCount = chatResultsCount + 1
+            else
+                local txt = ""
+                if child:GetAttribute("RawText") then
+                    txt = string.lower(child:GetAttribute("RawText"))
+                elseif child:FindFirstChild("MessageContent") and child.MessageContent:FindFirstChild("Text") then
+                    txt = string.lower(child.MessageContent.Text.Text)
+                end
+                local usr = child:FindFirstChild("Username") and string.lower(child.Username.Text) or ""
+                
+                if string.find(txt, query) or string.find(usr, query) then
+                    child.Visible = true
+                    chatResultsCount = chatResultsCount + 1
+                else
+                    child.Visible = false
+                end
+            end
+        end
+    end
+    ChatNoResults.Visible = (query ~= "" and chatResultsCount == 0)
+    
+    local stickerResultsCount = 0
+    for _, child in ipairs(LMG2L["StickerScroll_21"]:GetChildren()) do
+        if child:IsA("ImageButton") then
+            if query == "" then
+                child.Visible = true
+                stickerResultsCount = stickerResultsCount + 1
+            else
+                local sName = child:GetAttribute("SearchName") or ""
+                if string.find(string.lower(sName), query) then
+                    child.Visible = true
+                    stickerResultsCount = stickerResultsCount + 1
+                else
+                    child.Visible = false
+                end
+            end
+        end
+    end
+    
+    local audioResultsCount = 0
+    for _, child in ipairs(AudioScroll:GetChildren()) do
+        if child:IsA("TextButton") then
+            if query == "" then
+                child.Visible = true
+                audioResultsCount = audioResultsCount + 1
+            else
+                local aName = string.lower(child.Text)
+                if string.find(aName, query) then
+                    child.Visible = true
+                    audioResultsCount = audioResultsCount + 1
+                else
+                    child.Visible = false
+                end
+            end
+        end
+    end
+    
+    if query == "" then
+        MenuNoResults.Visible = false
+    elseif MenuSelection.Visible then
+        MenuNoResults.Visible = false
+    elseif LMG2L["StickerScroll_21"].Visible then
+        MenuNoResults.Visible = (stickerResultsCount == 0)
+    elseif AudioScroll.Visible then
+        MenuNoResults.Visible = (audioResultsCount == 0)
+    else
+        MenuNoResults.Visible = false
+    end
+    
+    if query == "" and isSearching then
+        isSearching = false
+        task.spawn(function()
+            task.wait()
+            LMG2L["ScrollingFrame_4"].CanvasPosition = savedChatScroll
+            LMG2L["StickerScroll_21"].CanvasPosition = savedStickerScroll
+            AudioScroll.CanvasPosition = savedAudioScroll
+        end)
+    end
+end
+
+LMG2L["SearchToggleBtn"].MouseButton1Click:Connect(function()
+    LMG2L["SearchBox"].Visible = not LMG2L["SearchBox"].Visible
+    if not LMG2L["SearchBox"].Visible then
+        LMG2L["SearchBox"].Text = ""
+        ChatNoResults.Visible = false
+        MenuNoResults.Visible = false
+    end
+end)
+
+LMG2L["SearchBox"]:GetPropertyChangedSignal("Text"):Connect(UpdateSearch)
+
+BtnStickers.MouseButton1Click:Connect(function()
+    MenuSelection.Visible = false
+    HeaderTitle.Text = "Figurinhas"
+    HeaderFrame.Visible = true
+    LMG2L["StickerScroll_21"].Visible = true
+    AudioScroll.Visible = false
+    UpdateSearch()
+end)
+
+BtnAudios.MouseButton1Click:Connect(function()
+    MenuSelection.Visible = false
+    HeaderTitle.Text = "Áudios"
+    HeaderFrame.Visible = true
+    LMG2L["StickerScroll_21"].Visible = false
+    AudioScroll.Visible = true
+    UpdateSearch()
+end)
+
+BackBtn.MouseButton1Click:Connect(function()
+    HeaderFrame.Visible = false
+    LMG2L["StickerScroll_21"].Visible = false
+    AudioScroll.Visible = false
+    MenuSelection.Visible = true
+    UpdateSearch()
 end)
 
 LMG2L["MiniAudio_PlayPause"].MouseButton1Click:Connect(function()
@@ -1017,11 +1158,12 @@ LMG2L["MiniAudio_ScrollTo"].MouseButton1Click:Connect(function()
     end
 end)
 
-local function AddSticker(id)
+local function AddSticker(id, customName)
     local btn = Instance.new("ImageButton", LMG2L["StickerScroll_21"])
     btn.Size = UDim2.new(0, 60, 0, 60)
     btn.BackgroundTransparency = 1
     btn.Image = "rbxassetid://" .. id
+    btn:SetAttribute("SearchName", customName and tostring(customName) or tostring(id))
     btn.MouseButton1Click:Connect(function()
         LMG2L["TextBox_19"].Text = LMG2L["TextBox_19"].Text .. ":sticker:" .. id .. ":"
     end)
@@ -1037,28 +1179,19 @@ end
 
 task.spawn(function()
     pcall(function()
-        local response = readfile("RBX_Chat/stickers/Stickers.lua")
-        if response then
-            for line in response:gmatch("[^\r\n]+") do
-                line = line:gsub("%-%-.*", ""):gsub("//.*", ""):gsub("#.*", "")
-                local id = line:match("%d+")
-                if id then
-                    AddSticker(tonumber(id))
-                end
-            end
-        end
-    end)
-end)
+        for _, file in ipairs(listfiles("RBX_Chat/stickers")) do
+            if file:sub(-4) == ".lua" then
+                local response = readfile(file)
 
-task.spawn(function()
-    pcall(function()
-        local response2 = readfile("RBX_Chat/stickers/More-Stickers.lua")
-        if response2 then
-            for line2 in response2:gmatch("[^\r\n]+") do
-                line2 = line2:gsub("%-%-.*", ""):gsub("//.*", ""):gsub("#.*", "")
-                local id2 = line2:match("%d+")
-                if id2 then
-                    AddSticker(tonumber(id2))
+                for line in response:gmatch("[^\r\n]+") do
+                    local id, name = line:match("^(%d+)%s*%-%-%s*(.*)")
+                    if not id then
+                        id = line:match("^(%d+)")
+                    end
+
+                    if id then
+                        AddSticker(tonumber(id), name or tostring(id))
+                    end
                 end
             end
         end
@@ -1120,6 +1253,15 @@ end)
 
 local function ReceiveMessage(username, userId, text, timestamp)
     local NewMessage = MessageTemplate:Clone()
+    
+    local rawForSearch = text
+    if text:match(":sticker:%d+:") then
+        rawForSearch = rawForSearch .. " figurinha sticker"
+    end
+    if text:match(":audio:%d+:") then
+        rawForSearch = rawForSearch .. " audio"
+    end
+    NewMessage:SetAttribute("RawText", rawForSearch)
 
     NewMessage.Username.Text = username
     NewMessage.Thumbnail.Image = "rbxthumb://type=AvatarHeadShot&id=" .. tostring(userId) .. "&w=420&h=420"
@@ -1171,6 +1313,7 @@ local function ReceiveMessage(username, userId, text, timestamp)
     UIGrid.CellSize = UDim2.new(0, 70, 0, 70)
     UIGrid.CellPadding = UDim2.new(0, 5, 0, 5)
     UIGrid.SortOrder = Enum.SortOrder.LayoutOrder
+    UIGrid.HorizontalAlignment = Enum.HorizontalAlignment.Left
 
     local AudioContainer = Instance.new("Frame", AttachmentContainer)
     AudioContainer.Name = "Audios"
@@ -1224,6 +1367,17 @@ local function ReceiveMessage(username, userId, text, timestamp)
         end
     end)
 
+    if LMG2L["SearchBox"].Visible and LMG2L["SearchBox"].Text ~= "" then
+        local query = string.lower(LMG2L["SearchBox"].Text)
+        local txt = string.lower(rawForSearch)
+        local usr = string.lower(username)
+        if string.find(txt, query) or string.find(usr, query) then
+            NewMessage.Visible = true
+        else
+            NewMessage.Visible = false
+        end
+    end
+
     local ScrollFrame = LMG2L["ScrollingFrame_4"]
     local MaxScroll = ScrollFrame.AbsoluteCanvasSize.Y - ScrollFrame.AbsoluteWindowSize.Y
     local IsNearBottom = ScrollFrame.CanvasPosition.Y >= (MaxScroll - 50)
@@ -1244,7 +1398,7 @@ local function ReceiveMessage(username, userId, text, timestamp)
         if not IsMyMessage then
             UnreadMessagesCount = UnreadMessagesCount + 1
             if UnreadMessagesCount == 1 then
-                FirstUnreadTime = timeStr or os.date("%H:%M")
+                FirstUnreadTime = timestamp and os.date("%H:%M", DateTime.fromIsoDate(timestamp):UnixTimestamp()) or os.date("%H:%M")
             end
             
             if UnreadMessagesCount == 1 then
@@ -1331,39 +1485,65 @@ local function ConnectWebSocket()
         ws = nil
     end
 
-    local success, socket = pcall(function()
-        return WebSocket.connect("wss://rbxchat.rbxprojects.workers.dev")
-    end)
+    SetStatus("Connecting")
     
-    if success and socket then
-        ws = socket
-        
-        ws.OnMessage:Connect(function(msg)
-            if CurrentConnection ~= ConnectionID then return end
-            LMG2L["Loading_17"]["Visible"] = false
-            local s, data = pcall(function() return HttpService:JSONDecode(msg) end)
-            if s and data.username and data.text then
-                ReceiveMessage(data.username, data.userId, data.text, data.timestamp)
-            end
+    task.spawn(function()
+        local success, socket = pcall(function()
+            return WebSocket.connect("wss://rbxchat.rbxprojects.workers.dev")
         end)
         
-        if ws.OnClose then
-            ws.OnClose:Connect(function()
+        if CurrentConnection ~= ConnectionID then return end
+        
+        if success and socket then
+            ws = socket
+            SetStatus("Online")
+            
+            pcall(function()
+                socket.OnMessage:Connect(function(msg)
+                    if CurrentConnection ~= ConnectionID then return end
+                    LMG2L["Loading_17"]["Visible"] = false
+                    local s, data = pcall(function() return HttpService:JSONDecode(msg) end)
+                    if s and data.username and data.text then
+                        ReceiveMessage(data.username, data.userId, data.text, data.timestamp)
+                    end
+                end)
+            end)
+            
+            local function handleClose()
                 if CurrentConnection == ConnectionID then
                     ws = nil
+                    SetStatus("Offline")
+                end
+            end
+
+            pcall(function()
+                if socket.OnClose then
+                    socket.OnClose:Connect(handleClose)
                 end
             end)
+            
+            pcall(function()
+                if socket.OnDisconnect then
+                    socket.OnDisconnect:Connect(handleClose)
+                end
+            end)
+        else
+            ws = nil
+            SetStatus("Offline")
         end
         isConnecting = false
-        return true
-    else
-        ws = nil
-        isConnecting = false
-        return false
-    end
+    end)
+    
+    return true
 end
 
-task.spawn(ConnectWebSocket)
+task.spawn(function()
+    while task.wait(3) do
+        if not ws and not isConnecting then
+            pcall(ConnectWebSocket)
+        end
+    end
+end)
 
 local IsSending = false
 LMG2L["SendMessage_1c"].MouseButton1Click:Connect(function()
@@ -1374,7 +1554,7 @@ LMG2L["SendMessage_1c"].MouseButton1Click:Connect(function()
         IsSending = true
         LMG2L["Loading_17"]["Visible"] = true
         
-        if not ws then
+        if not ws and not isConnecting then
             ConnectWebSocket()
         end
         
@@ -1393,7 +1573,11 @@ LMG2L["SendMessage_1c"].MouseButton1Click:Connect(function()
             if not success then
                 LMG2L["Loading_17"]["Visible"] = false
                 SendNotification("RBX Chat", "Erro na conexão. Tente enviar novamente.", 3,  getcustomasset("RBX_Chat/assets/message-square-more.png"))
-                ws = nil 
+                if ws then
+                    pcall(function() ws:Close() end)
+                    ws = nil
+                end
+                SetStatus("Offline")
             end
         else
             LMG2L["Loading_17"]["Visible"] = false
