@@ -953,7 +953,7 @@ LMG2L["SearchToggleBtn"]["Position"] = UDim2.new(0, 102, 0, 9)
 
 LMG2L["SearchBox"] = Instance.new("TextBox", LMG2L["MainFrame_3"])
 LMG2L["SearchBox"]["BackgroundColor3"] = Color3.fromRGB(40, 40, 40)
-LMG2L["SearchBox"]["BackgroundTransparency"] = 0.5
+LMG2L["SearchBox"]["BackgroundTransparency"] = 0.4
 LMG2L["SearchBox"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
 LMG2L["SearchBox"]["PlaceholderText"] = "Pesquisar..."
 LMG2L["SearchBox"]["PlaceholderColor3"] = Color3.fromRGB(151, 151, 151)
@@ -1016,7 +1016,7 @@ LMG2L["TextBox_19"]["PlaceholderText"] = "Digite uma mensagem..."
 LMG2L["TextBox_19"]["Size"] = UDim2.new(0, 328, 0, 30)
 LMG2L["TextBox_19"]["Position"] = UDim2.new(0, 6, 0, 210)
 LMG2L["TextBox_19"]["Text"] = ""
-LMG2L["TextBox_19"]["BackgroundTransparency"] = 0.5
+LMG2L["TextBox_19"]["BackgroundTransparency"] = 0.4
 LMG2L["TextBox_19"]["ClipsDescendants"] = true
 
 LMG2L["UIStroke_1a"] = Instance.new("UIStroke", LMG2L["TextBox_19"])
@@ -1029,7 +1029,7 @@ LMG2L["UICorner_1b"]["CornerRadius"] = UDim.new(0, 3)
 LMG2L["StickerButton_1f"] = Instance.new("ImageButton", LMG2L["MainFrame_3"])
 LMG2L["StickerButton_1f"]["BorderSizePixel"] = 0
 LMG2L["StickerButton_1f"]["AutoButtonColor"] = false
-LMG2L["StickerButton_1f"]["BackgroundTransparency"] = 0.5
+LMG2L["StickerButton_1f"]["BackgroundTransparency"] = 0.4
 LMG2L["StickerButton_1f"]["BackgroundColor3"] = Color3.fromRGB(51, 51, 51)
 LMG2L["StickerButton_1f"]["Image"] = getcustomasset("RBX_Chat/assets/plus.png")
 LMG2L["StickerButton_1f"]["Size"] = UDim2.new(0, 30, 0, 30)
