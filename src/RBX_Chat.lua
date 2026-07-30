@@ -72,9 +72,7 @@ MakeFolder("RBX_Chat/stickers")
 MakeFolder("RBX_Chat/audios")
 MakeFolder("RBX_Chat/rooms")
 
-if not isfile("RBX_Chat/rooms/global.lua") then
-    writefile("RBX_Chat/rooms/global.lua", "Global")
-end
+PreDownloadLuaFile("rooms/Global.lua")
 
 DownloadAsset("clipboard-copy.png")
 DownloadAsset("loading.png")
@@ -599,22 +597,33 @@ RoomsPadding.PaddingTop = UDim.new(0, 2)
 RoomsPadding.PaddingBottom = UDim.new(0, 8)
 
 local function CreateSection(text, parent)
-    local sectionLbl = Instance.new("TextLabel", parent)
-    sectionLbl.Size = UDim2.new(1, -16, 0, 14)
-    sectionLbl.BackgroundTransparency = 1
-    sectionLbl.Text = text
-    sectionLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-    sectionLbl.FontFace = Font.new("rbxasset://fonts/families/BuilderSans.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-    sectionLbl.TextSize = 14
-    sectionLbl.TextXAlignment = Enum.TextXAlignment.Center
-    return sectionLbl
+    local sectionLabel = Instance.new("TextLabel", parent)
+    sectionLabel.Size = UDim2.new(1, -16, 0, 14)
+    sectionLabel.BackgroundTransparency = 1
+    sectionLabel.Text = text
+    sectionLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    sectionLabel.FontFace = Font.new("rbxasset://fonts/families/BuilderSans.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+    sectionLabel.TextSize = 14
+    sectionLabel.TextXAlignment = Enum.TextXAlignment.Center
+    return sectionLabel
 end
 
-local CurrentRoomSection = CreateSection("Sala atual: Global", RoomsFrame)
+local HeadersContainer = Instance.new("Frame", RoomsFrame)
+HeadersContainer.Name = "HeadersContainer"
+HeadersContainer.Size = UDim2.new(1, 0, 0, 30)
+HeadersContainer.BackgroundTransparency = 1
+HeadersContainer.LayoutOrder = 1
+
+local HeadersLayout = Instance.new("UIListLayout", HeadersContainer)
+HeadersLayout.Padding = UDim.new(0, 2)
+HeadersLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+HeadersLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+local CurrentRoomSection = CreateSection("Sala atual: Global", HeadersContainer)
 CurrentRoomSection.LayoutOrder = 1
 
-local SalasSection = CreateSection("Salas", RoomsFrame)
-SalasSection.LayoutOrder = 2
+local RoomsSection = CreateSection("Salas", HeadersContainer)
+RoomsSection.LayoutOrder = 2
 
 local function CleanRoomName(name)
     if not name then return "global" end
@@ -637,15 +646,25 @@ task.spawn(function()
             if file:sub(-4) == ".lua" then
                 local response = readfile(file)
                 for line in response:gmatch("[^\r\n]+") do
-                    local roomName = line:match("^%s*(.-)%s*$")
-                    if roomName and roomName ~= "" then
+                    local displayName, internalName = line:match("^(.-)%s*%-%-%s*(.+)$")
+                    
+                    if not displayName then
+                        displayName = line:match("^%s*(.-)%s*$")
+                        internalName = displayName
+                        if string.lower(internalName) == "global" then internalName = "global" end
+                    end
+
+                    if displayName and displayName ~= "" then
+                        displayName = displayName:match("^%s*(.-)%s*$")
+                        internalName = internalName:match("^%s*(.-)%s*$")
+
                         local roomBtn = Instance.new("TextButton", RoomsFrame)
                         roomBtn.Size = UDim2.new(1, -16, 0, 30)
                         roomBtn.BackgroundColor3 = Color3.fromRGB(63, 63, 63)
                         roomBtn.BackgroundTransparency = 0.4
                         roomBtn.BorderSizePixel = 0
                         
-                        roomBtn.Text = roomName
+                        roomBtn.Text = displayName
                         roomBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
                         roomBtn.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
                         roomBtn.TextSize = 12
@@ -653,7 +672,7 @@ task.spawn(function()
                         roomBtn.AutomaticSize = Enum.AutomaticSize.Y
                         roomBtn.TextXAlignment = Enum.TextXAlignment.Left
                         
-                        if CleanRoomName(roomName) == "global" then
+                        if internalName == "global" then
                             roomBtn.LayoutOrder = 3
                         else
                             roomBtn.LayoutOrder = RoomLayoutCounter
@@ -673,13 +692,13 @@ task.spawn(function()
                         local dotCorner = Instance.new("UICorner", statusDot)
                         dotCorner.CornerRadius = UDim.new(1, 0)
                         
-                        if CleanRoomName(roomName) == CurrentRoom then
+                        if internalName == CurrentRoom then
                             statusDot.BackgroundColor3 = Color3.fromRGB(209, 250, 229)
                         else
                             statusDot.BackgroundColor3 = Color3.fromRGB(254, 226, 226)
                         end
 
-                        RoomButtons[roomName] = roomBtn
+                        RoomButtons[internalName] = roomBtn
 
                         local rCorner = Instance.new("UICorner", roomBtn)
                         rCorner.CornerRadius = UDim.new(0, 4)
@@ -690,7 +709,7 @@ task.spawn(function()
                         
                         roomBtn.MouseButton1Click:Connect(function()
                             if SwitchRoom then
-                                SwitchRoom(roomName)
+                                SwitchRoom(displayName, internalName)
                             end
                         end)
                     end
@@ -1727,18 +1746,19 @@ local function ConnectWebSocket()
     return true
 end
 
-SwitchRoom = function(visualName)
+SwitchRoom = function(visualName, internalName)
     if not visualName or visualName == "" then visualName = "Global" end
-    local cleanName = CleanRoomName(visualName)
-    if CurrentRoom == cleanName then return end
+    if not internalName or internalName == "" then internalName = "global" end
     
-    CurrentRoom = cleanName
+    if CurrentRoom == internalName then return end
+    
+    CurrentRoom = internalName
     CurrentVisualRoom = visualName
     CurrentRoomSection.Text = "Sala atual: " .. CurrentVisualRoom
     
-    for vName, btn in pairs(RoomButtons) do
+    for rID, btn in pairs(RoomButtons) do
         local dot = btn:FindFirstChild("StatusDot")
-        if CleanRoomName(vName) == CurrentRoom then
+        if rID == CurrentRoom then
             if dot then dot.BackgroundColor3 = Color3.fromRGB(209, 250, 229) end
         else
             if dot then dot.BackgroundColor3 = Color3.fromRGB(254, 226, 226) end
