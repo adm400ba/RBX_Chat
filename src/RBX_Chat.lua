@@ -73,6 +73,7 @@ PreDownloadAsset("message-square-more.png")
 
 MakeFolder("RBX_Chat/stickers")
 MakeFolder("RBX_Chat/audios")
+MakeFolder("RBX_Chat/rooms")
 
 DownloadAsset("clipboard-copy.png")
 DownloadAsset("loading.png")
@@ -88,6 +89,7 @@ DownloadAsset("arrow-left.png")
 DownloadAsset("audio-lines.png")
 DownloadAsset("sticker.png")
 DownloadAsset("search.png")
+DownloadAsset("users.png")
 
 PreDownloadLuaFile("stickers/Stickers.lua")
 DownloadLuaFile("stickers/More-Stickers.lua")
@@ -524,6 +526,8 @@ local BtnStickers = CreateTabEntranceBtn("Figurinhas", "sticker.png", MenuSelect
 BtnStickers.LayoutOrder = 1
 local BtnAudios = CreateTabEntranceBtn("Áudios", "audio-lines.png", MenuSelection)
 BtnAudios.LayoutOrder = 2
+local BtnSalas = CreateTabEntranceBtn("Salas", "users.png", MenuSelection)
+BtnSalas.LayoutOrder = 3
 
 LMG2L["StickerScroll_21"] = Instance.new("ScrollingFrame", LMG2L["StickerMenu_20"])
 LMG2L["StickerScroll_21"]["Size"] = UDim2.new(1, 0, 1, -30)
@@ -577,6 +581,124 @@ local AudioPadding = Instance.new("UIPadding", AudioScroll)
 AudioPadding.PaddingTop = UDim.new(0, 8)
 AudioPadding.PaddingBottom = UDim.new(0, 8)
 
+local RoomsFrame = Instance.new("Frame", LMG2L["StickerMenu_20"])
+RoomsFrame.Name = "RoomsFrame"
+RoomsFrame.Size = UDim2.new(1, 0, 1, -30)
+RoomsFrame.Position = UDim2.new(0, 0, 0, 30)
+RoomsFrame.BackgroundTransparency = 1
+RoomsFrame.Visible = false
+
+local RoomsListLayout = Instance.new("UIListLayout", RoomsFrame)
+RoomsListLayout.Padding = UDim.new(0, 8)
+RoomsListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+RoomsListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+local RoomsPadding = Instance.new("UIPadding", RoomsFrame)
+RoomsPadding.PaddingTop = UDim.new(0, 2)
+RoomsPadding.PaddingBottom = UDim.new(0, 8)
+
+local function CreateSection(text, parent)
+    local sectionLbl = Instance.new("TextLabel", parent)
+    sectionLbl.Size = UDim2.new(1, -16, 0, 20)
+    sectionLbl.BackgroundTransparency = 1
+    sectionLbl.Text = text
+    sectionLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+    sectionLbl.FontFace = Font.new("rbxasset://fonts/families/BuilderSans.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+    sectionLbl.TextSize = 14
+    sectionLbl.TextXAlignment = Enum.TextXAlignment.Center
+    return sectionLbl
+end
+
+local CurrentRoomSection = CreateSection("Sala atual: global", RoomsFrame)
+CurrentRoomSection.LayoutOrder = 1
+
+local RoomTextBox = Instance.new("TextBox", RoomsFrame)
+RoomTextBox.Size = UDim2.new(1, -16, 0, 30)
+RoomTextBox.BackgroundColor3 = Color3.fromRGB(51, 51, 51)
+RoomTextBox.BackgroundTransparency = 0.4
+RoomTextBox.BorderSizePixel = 0
+RoomTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+RoomTextBox.FontFace = Font.new("rbxasset://fonts/families/BuilderSans.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+RoomTextBox.TextSize = 13
+RoomTextBox.PlaceholderText = "Nome da Sala"
+RoomTextBox.Text = "global"
+RoomTextBox.ClearTextOnFocus = false
+RoomTextBox.LayoutOrder = 2
+
+local RoomTBCorner = Instance.new("UICorner", RoomTextBox)
+RoomTBCorner.CornerRadius = UDim.new(0, 4)
+
+local RoomTBStroke = Instance.new("UIStroke", RoomTextBox)
+RoomTBStroke.Color = Color3.fromRGB(63, 63, 63)
+RoomTBStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+local SalasSection = CreateSection("Salas", RoomsFrame)
+SalasSection.LayoutOrder = 3
+
+local GlobalBtn = Instance.new("TextButton", RoomsFrame)
+GlobalBtn.Size = UDim2.new(1, -16, 0, 30)
+GlobalBtn.BackgroundColor3 = Color3.fromRGB(63, 63, 63)
+GlobalBtn.BackgroundTransparency = 0.4
+GlobalBtn.BorderSizePixel = 0
+GlobalBtn.Text = "Conectar na sala global"
+GlobalBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+GlobalBtn.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+GlobalBtn.TextSize = 12
+GlobalBtn.TextWrapped = true
+GlobalBtn.AutomaticSize = Enum.AutomaticSize.Y
+GlobalBtn.LayoutOrder = 4
+
+local GlobalBtnCorner = Instance.new("UICorner", GlobalBtn)
+GlobalBtnCorner.CornerRadius = UDim.new(0, 4)
+
+local GlobalBtnStroke = Instance.new("UIStroke", GlobalBtn)
+GlobalBtnStroke.Color = Color3.fromRGB(63, 63, 63)
+GlobalBtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+local SwitchRoom
+
+local RoomLayoutCounter = 5
+task.spawn(function()
+    pcall(function()
+        for _, file in ipairs(listfiles("RBX_Chat/rooms")) do
+            if file:sub(-4) == ".lua" then
+                local response = readfile(file)
+                for line in response:gmatch("[^\r\n]+") do
+                    local roomName = line:match("^%s*(.-)%s*$")
+                    if roomName and roomName ~= "" then
+                        local roomBtn = Instance.new("TextButton", RoomsFrame)
+                        roomBtn.Size = UDim2.new(1, -16, 0, 30)
+                        roomBtn.BackgroundColor3 = Color3.fromRGB(63, 63, 63)
+                        roomBtn.BackgroundTransparency = 0.4
+                        roomBtn.BorderSizePixel = 0
+                        roomBtn.Text = "Conectar na sala " .. roomName
+                        roomBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+                        roomBtn.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+                        roomBtn.TextSize = 12
+                        roomBtn.TextWrapped = true
+                        roomBtn.AutomaticSize = Enum.AutomaticSize.Y
+                        roomBtn.LayoutOrder = RoomLayoutCounter
+                        RoomLayoutCounter = RoomLayoutCounter + 1
+
+                        local rCorner = Instance.new("UICorner", roomBtn)
+                        rCorner.CornerRadius = UDim.new(0, 4)
+
+                        local rStroke = Instance.new("UIStroke", roomBtn)
+                        rStroke.Color = Color3.fromRGB(63, 63, 63)
+                        rStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                        
+                        roomBtn.MouseButton1Click:Connect(function()
+                            if SwitchRoom then
+                                SwitchRoom(roomName)
+                            end
+                        end)
+                    end
+                end
+            end
+        end
+    end)
+end)
+
 local function AddAudioTabItem(id, customName)
     local frame = Instance.new("TextButton", AudioScroll)
     frame.Size = UDim2.new(1, -16, 0, 30)
@@ -588,6 +710,8 @@ local function AddAudioTabItem(id, customName)
     frame.TextColor3 = Color3.fromRGB(255, 255, 255)
     frame.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
     frame.TextSize = 12
+    frame.TextWrapped = true
+    frame.AutomaticSize = Enum.AutomaticSize.Y
     
     local uic = Instance.new("UICorner", frame)
     uic.CornerRadius = UDim.new(0, 4)
@@ -943,6 +1067,8 @@ MessageTemplate.Parent = nil
 local ws
 local UnreadMessagesCount = 0
 local FirstUnreadTime = ""
+local CurrentRoom = "global"
+local notifyConnection = false
 
 local isConnecting = false
 local ConnectionID = 0
@@ -1027,6 +1153,11 @@ local function UpdateSearch()
     local chatResultsCount = 0
     for _, child in ipairs(LMG2L["ScrollingFrame_4"]:GetChildren()) do
         if child:IsA("Frame") and child.Name == "MessageFrame" then
+            if child:GetAttribute("Room") ~= CurrentRoom then
+                child.Visible = false
+                continue
+            end
+            
             if query == "" then
                 child.Visible = true
                 chatResultsCount = chatResultsCount + 1
@@ -1086,6 +1217,24 @@ local function UpdateSearch()
         end
     end
     
+    local roomsResultsCount = 0
+    for _, child in ipairs(RoomsFrame:GetChildren()) do
+        if child:IsA("TextButton") then
+            if query == "" then
+                child.Visible = true
+                roomsResultsCount = roomsResultsCount + 1
+            else
+                local rName = string.lower(child.Text)
+                if string.find(rName, query) then
+                    child.Visible = true
+                    roomsResultsCount = roomsResultsCount + 1
+                else
+                    child.Visible = false
+                end
+            end
+        end
+    end
+    
     if query == "" then
         MenuNoResults.Visible = false
     elseif MenuSelection.Visible then
@@ -1094,6 +1243,8 @@ local function UpdateSearch()
         MenuNoResults.Visible = (stickerResultsCount == 0)
     elseif AudioScroll.Visible then
         MenuNoResults.Visible = (audioResultsCount == 0)
+    elseif RoomsFrame.Visible then
+        MenuNoResults.Visible = (roomsResultsCount == 0)
     else
         MenuNoResults.Visible = false
     end
@@ -1126,6 +1277,7 @@ BtnStickers.MouseButton1Click:Connect(function()
     HeaderFrame.Visible = true
     LMG2L["StickerScroll_21"].Visible = true
     AudioScroll.Visible = false
+    RoomsFrame.Visible = false
     UpdateSearch()
 end)
 
@@ -1135,6 +1287,17 @@ BtnAudios.MouseButton1Click:Connect(function()
     HeaderFrame.Visible = true
     LMG2L["StickerScroll_21"].Visible = false
     AudioScroll.Visible = true
+    RoomsFrame.Visible = false
+    UpdateSearch()
+end)
+
+BtnSalas.MouseButton1Click:Connect(function()
+    MenuSelection.Visible = false
+    HeaderTitle.Text = "Salas"
+    HeaderFrame.Visible = true
+    LMG2L["StickerScroll_21"].Visible = false
+    AudioScroll.Visible = false
+    RoomsFrame.Visible = true
     UpdateSearch()
 end)
 
@@ -1142,6 +1305,7 @@ BackBtn.MouseButton1Click:Connect(function()
     HeaderFrame.Visible = false
     LMG2L["StickerScroll_21"].Visible = false
     AudioScroll.Visible = false
+    RoomsFrame.Visible = false
     MenuSelection.Visible = true
     UpdateSearch()
 end)
@@ -1282,6 +1446,7 @@ local function ReceiveMessage(username, userId, text, timestamp)
         rawForSearch = rawForSearch .. " audio"
     end
     NewMessage:SetAttribute("RawText", rawForSearch)
+    NewMessage:SetAttribute("Room", CurrentRoom)
 
     NewMessage.Username.Text = username
     NewMessage.Thumbnail.Image = "rbxthumb://type=AvatarHeadShot&id=" .. tostring(userId) .. "&w=420&h=420"
@@ -1494,6 +1659,15 @@ LMG2L["ScrollingFrame_4"]:GetPropertyChangedSignal("CanvasPosition"):Connect(fun
     end
 end)
 
+local function CleanRoomName(name)
+    if not name then return "global" end
+    name = name:gsub("^%s+", ""):gsub("%s+$", "")
+    name = string.lower(name)
+    name = name:gsub("%s+", "_")
+    if name == "" then return "global" end
+    return name
+end
+
 local function ConnectWebSocket()
     if isConnecting then return false end
     isConnecting = true
@@ -1509,7 +1683,7 @@ local function ConnectWebSocket()
     
     task.spawn(function()
         local success, socket = pcall(function()
-            return WebSocket.connect("wss://rbxchat.rbxprojects.workers.dev")
+            return WebSocket.connect("wss://rbx-chat.rbxprojects.workers.dev/?room=" .. CleanRoomName(CurrentRoom))
         end)
         
         if CurrentConnection ~= ConnectionID then return end
@@ -1517,6 +1691,11 @@ local function ConnectWebSocket()
         if success and socket then
             ws = socket
             SetStatus("Online")
+            
+            if notifyConnection then
+                SendNotification("RBX Chat", 'Conectado na sala "' .. CurrentRoom .. '".', 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
+                notifyConnection = false
+            end
             
             pcall(function()
                 socket.OnMessage:Connect(function(msg)
@@ -1557,6 +1736,41 @@ local function ConnectWebSocket()
     return true
 end
 
+SwitchRoom = function(newRoom)
+    if not newRoom or newRoom == "" then newRoom = "global" end
+    if CurrentRoom == newRoom then return end
+    CurrentRoom = newRoom
+    RoomTextBox.Text = CurrentRoom
+    CurrentRoomSection.Text = "Sala atual: " .. CurrentRoom
+    
+    for _, child in ipairs(LMG2L["ScrollingFrame_4"]:GetChildren()) do
+        if child:IsA("Frame") and child.Name == "MessageFrame" then
+            if child:GetAttribute("Room") == CurrentRoom then
+                child.Visible = true
+            else
+                child.Visible = false
+            end
+        end
+    end
+    UpdateSearch()
+    
+    SendNotification("RBX Chat", 'Conectando na sala "' .. CurrentRoom .. '"...', 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
+    notifyConnection = true
+    if ws then
+        pcall(function() ws:Close() end)
+        ws = nil
+    end
+    ConnectWebSocket()
+end
+
+RoomTextBox.FocusLost:Connect(function()
+    SwitchRoom(RoomTextBox.Text)
+end)
+
+GlobalBtn.MouseButton1Click:Connect(function()
+    SwitchRoom("global")
+end)
+
 task.spawn(function()
     while task.wait(3) do
         if not ws and not isConnecting then
@@ -1569,6 +1783,16 @@ local IsSending = false
 LMG2L["SendMessage_1c"].MouseButton1Click:Connect(function()
     if IsSending then return end
     local Text = LMG2L["TextBox_19"].Text
+    
+    Text = Text:gsub("[%z\1-\127\194-\244][\128-\191]*", function(c)
+        if #c > 3 then return "" end
+        local s, cp = pcall(utf8.codepoint, c)
+        if s and cp then
+            if cp < 32 and cp ~= 10 then return "" end
+            return c
+        end
+        return ""
+    end):gsub("[\128-\255]", "")
     
     if Text:match("%S") or Text:match(":sticker:%d+:") or Text:match(":audio:%d+:") then
         IsSending = true
