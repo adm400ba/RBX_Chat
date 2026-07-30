@@ -1798,16 +1798,6 @@ LMG2L["SendMessage_1c"].MouseButton1Click:Connect(function()
     if IsSending then return end
     local Text = LMG2L["TextBox_19"].Text
     
-    Text = Text:gsub("[%z\1-\127\194-\244][\128-\191]*", function(c)
-        if #c > 3 then return "" end
-        local s, cp = pcall(utf8.codepoint, c)
-        if s and cp then
-            if cp < 32 and cp ~= 10 then return "" end
-            return c
-        end
-        return ""
-    end):gsub("[\128-\255]", "")
-    
     if Text:match("%S") or Text:match(":sticker:%d+:") or Text:match(":audio:%d+:") then
         IsSending = true
         LMG2L["Loading_17"]["Visible"] = true
