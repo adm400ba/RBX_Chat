@@ -20,13 +20,11 @@ end
 
 local function FormatMarkdown(text)
     if not text then return "" end
-    
     text = text:gsub("%*%*(.-)%*%*", "<b>%1</b>")
     text = text:gsub("__(.-)__", "<u>%1</u>")
     text = text:gsub("%*(.-)%*", "<i>%1</i>")
     text = text:gsub("_(.-)_", "<i>%1</i>")
     text = text:gsub("~~(.-)~~", "<s>%1</s>")
-    
     text = text:gsub("%[color=([^%]]+)%](.-)%[/color%]", '<font color="%1">%2</font>')
     text = text:gsub("%[size=(%d+)%](.-)%[/size%]", '<font size="%1">%2</font>')
     text = text:gsub("%[font=([^%]]+)%](.-)%[/font%]", '<font face="%1">%2</font>')
@@ -34,25 +32,24 @@ local function FormatMarkdown(text)
     text = text:gsub("%[stroke=([^%]]+)%](.-)%[/stroke%]", '<stroke color="%1" joins="miter" thickness="1.5">%2</stroke>')
     text = text:gsub("%[uc%](.-)%[/uc%]", "<uppercase>%1</uppercase>")
     text = text:gsub("%[sc%](.-)%[/sc%]", "<sc>%1</sc>")
-    
     return text
 end
 
 local function MakeFolder(name)
-if not isfolder(name) then
-    makefolder(name)
-end
+    if not isfolder(name) then
+        makefolder(name)
+    end
 end
 
 local function PreDownloadAsset(name)
-writefile("RBX_Chat/assets/" .. name, game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/" .. name))
+    writefile("RBX_Chat/assets/" .. name, game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/" .. name))
 end
 
 local function DownloadAsset(name)
-if not isfile("RBX_Chat/assets/" .. name) then
-    SendNotification("RBX Chat", 'Baixando asset "' .. name .. '"...', 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-    writefile("RBX_Chat/assets/" .. name, game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/" .. name))
-end
+    if not isfile("RBX_Chat/assets/" .. name) then
+        SendNotification("RBX Chat", 'Baixando asset "' .. name .. '"...', 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
+        writefile("RBX_Chat/assets/" .. name, game:HttpGet("https://github.com/adm400ba/RBX_Chat/raw/refs/heads/main/assets/" .. name))
+    end
 end
 
 local function PreDownloadLuaFile(path)
@@ -74,6 +71,10 @@ PreDownloadAsset("message-square-more.png")
 MakeFolder("RBX_Chat/stickers")
 MakeFolder("RBX_Chat/audios")
 MakeFolder("RBX_Chat/rooms")
+
+if not isfile("RBX_Chat/rooms/global.lua") then
+    writefile("RBX_Chat/rooms/global.lua", "Global")
+end
 
 DownloadAsset("clipboard-copy.png")
 DownloadAsset("loading.png")
@@ -130,17 +131,17 @@ function UILibrary:CreateAudioPlayer(id, title, parent)
     titleLbl.TextTruncate = Enum.TextTruncate.AtEnd
 
     if not getgenv().AudioNames[tostring(id)] then
-    task.spawn(function()
-        local s, r = pcall(function()
-            return MarketplaceService:GetProductInfo(id)
+        task.spawn(function()
+            local s, r = pcall(function()
+                return MarketplaceService:GetProductInfo(id)
+            end)
+            if s and r and r.Name then
+                getgenv().AudioNames[tostring(id)] = r.Name
+                titleLbl.Text = r.Name
+            else
+                titleLbl.Text = "Desconhecido"
+            end
         end)
-        if s and r and r.Name then
-            getgenv().AudioNames[tostring(id)] = r.Name
-            titleLbl.Text = r.Name
-        else
-            titleLbl.Text = "Desconhecido"
-          end
-       end)
     end
 
     local pBtn = Instance.new("ImageButton", aFrame)
@@ -599,7 +600,7 @@ RoomsPadding.PaddingBottom = UDim.new(0, 8)
 
 local function CreateSection(text, parent)
     local sectionLbl = Instance.new("TextLabel", parent)
-    sectionLbl.Size = UDim2.new(1, -16, 0, 20)
+    sectionLbl.Size = UDim2.new(1, -16, 0, 14)
     sectionLbl.BackgroundTransparency = 1
     sectionLbl.Text = text
     sectionLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -609,55 +610,27 @@ local function CreateSection(text, parent)
     return sectionLbl
 end
 
-local CurrentRoomSection = CreateSection("Sala atual: global", RoomsFrame)
+local CurrentRoomSection = CreateSection("Sala atual: Global", RoomsFrame)
 CurrentRoomSection.LayoutOrder = 1
 
-local RoomTextBox = Instance.new("TextBox", RoomsFrame)
-RoomTextBox.Size = UDim2.new(1, -16, 0, 30)
-RoomTextBox.BackgroundColor3 = Color3.fromRGB(51, 51, 51)
-RoomTextBox.BackgroundTransparency = 0.4
-RoomTextBox.BorderSizePixel = 0
-RoomTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-RoomTextBox.FontFace = Font.new("rbxasset://fonts/families/BuilderSans.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-RoomTextBox.TextSize = 13
-RoomTextBox.PlaceholderText = "Nome da Sala"
-RoomTextBox.Text = "global"
-RoomTextBox.ClearTextOnFocus = false
-RoomTextBox.LayoutOrder = 2
-
-local RoomTBCorner = Instance.new("UICorner", RoomTextBox)
-RoomTBCorner.CornerRadius = UDim.new(0, 4)
-
-local RoomTBStroke = Instance.new("UIStroke", RoomTextBox)
-RoomTBStroke.Color = Color3.fromRGB(63, 63, 63)
-RoomTBStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
 local SalasSection = CreateSection("Salas", RoomsFrame)
-SalasSection.LayoutOrder = 3
+SalasSection.LayoutOrder = 2
 
-local GlobalBtn = Instance.new("TextButton", RoomsFrame)
-GlobalBtn.Size = UDim2.new(1, -16, 0, 30)
-GlobalBtn.BackgroundColor3 = Color3.fromRGB(63, 63, 63)
-GlobalBtn.BackgroundTransparency = 0.4
-GlobalBtn.BorderSizePixel = 0
-GlobalBtn.Text = "Conectar na sala global"
-GlobalBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-GlobalBtn.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-GlobalBtn.TextSize = 12
-GlobalBtn.TextWrapped = true
-GlobalBtn.AutomaticSize = Enum.AutomaticSize.Y
-GlobalBtn.LayoutOrder = 4
-
-local GlobalBtnCorner = Instance.new("UICorner", GlobalBtn)
-GlobalBtnCorner.CornerRadius = UDim.new(0, 4)
-
-local GlobalBtnStroke = Instance.new("UIStroke", GlobalBtn)
-GlobalBtnStroke.Color = Color3.fromRGB(63, 63, 63)
-GlobalBtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+local function CleanRoomName(name)
+    if not name then return "global" end
+    name = string.lower(name)
+    name = string.gsub(name, "[^a-z0-9]", "")
+    if name == "" then return "global" end
+    return name
+end
 
 local SwitchRoom
+local RoomButtons = {}
+local CurrentVisualRoom = "Global"
+local CurrentRoom = "global"
 
-local RoomLayoutCounter = 5
+local RoomLayoutCounter = 4
+
 task.spawn(function()
     pcall(function()
         for _, file in ipairs(listfiles("RBX_Chat/rooms")) do
@@ -671,14 +644,42 @@ task.spawn(function()
                         roomBtn.BackgroundColor3 = Color3.fromRGB(63, 63, 63)
                         roomBtn.BackgroundTransparency = 0.4
                         roomBtn.BorderSizePixel = 0
-                        roomBtn.Text = "Conectar na sala " .. roomName
+                        
+                        roomBtn.Text = roomName
                         roomBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
                         roomBtn.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
                         roomBtn.TextSize = 12
                         roomBtn.TextWrapped = true
                         roomBtn.AutomaticSize = Enum.AutomaticSize.Y
-                        roomBtn.LayoutOrder = RoomLayoutCounter
-                        RoomLayoutCounter = RoomLayoutCounter + 1
+                        roomBtn.TextXAlignment = Enum.TextXAlignment.Left
+                        
+                        if CleanRoomName(roomName) == "global" then
+                            roomBtn.LayoutOrder = 3
+                        else
+                            roomBtn.LayoutOrder = RoomLayoutCounter
+                            RoomLayoutCounter = RoomLayoutCounter + 1
+                        end
+                        
+                        local btnPadding = Instance.new("UIPadding", roomBtn)
+                        btnPadding.PaddingLeft = UDim.new(0, 26)
+
+                        local statusDot = Instance.new("Frame", roomBtn)
+                        statusDot.Name = "StatusDot"
+                        statusDot.Size = UDim2.new(0, 8, 0, 8)
+                        statusDot.Position = UDim2.new(0, -16, 0.5, 0)
+                        statusDot.AnchorPoint = Vector2.new(0, 0.5)
+                        statusDot.BorderSizePixel = 0
+                        
+                        local dotCorner = Instance.new("UICorner", statusDot)
+                        dotCorner.CornerRadius = UDim.new(1, 0)
+                        
+                        if CleanRoomName(roomName) == CurrentRoom then
+                            statusDot.BackgroundColor3 = Color3.fromRGB(209, 250, 229)
+                        else
+                            statusDot.BackgroundColor3 = Color3.fromRGB(254, 226, 226)
+                        end
+
+                        RoomButtons[roomName] = roomBtn
 
                         local rCorner = Instance.new("UICorner", roomBtn)
                         rCorner.CornerRadius = UDim.new(0, 4)
@@ -1067,7 +1068,6 @@ MessageTemplate.Parent = nil
 local ws
 local UnreadMessagesCount = 0
 local FirstUnreadTime = ""
-local CurrentRoom = "global"
 local notifyConnection = false
 
 local isConnecting = false
@@ -1521,18 +1521,18 @@ local function ReceiveMessage(username, userId, text, timestamp)
 
     local textForStickers = text:gsub(":audio:%d+:", "")
     for id in textForStickers:gmatch(":sticker:(%d+):") do
-    hasAttachments = true
-    local img = Instance.new("ImageLabel", StickerContainer)
-    img.BackgroundTransparency = 1
-    img.Image = "rbxassetid://" .. id
-    
-    task.spawn(function()
-        ContentProvider:PreloadAsync({img}, function(contentId, status)
-            if status == Enum.AssetFetchStatus.Failure then
-                img.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
-             end
-          end)
-       end)
+        hasAttachments = true
+        local img = Instance.new("ImageLabel", StickerContainer)
+        img.BackgroundTransparency = 1
+        img.Image = "rbxassetid://" .. id
+        
+        task.spawn(function()
+            ContentProvider:PreloadAsync({img}, function(contentId, status)
+                if status == Enum.AssetFetchStatus.Failure then
+                    img.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
+                end
+            end)
+        end)
     end
 
     if not hasAttachments then
@@ -1659,15 +1659,6 @@ LMG2L["ScrollingFrame_4"]:GetPropertyChangedSignal("CanvasPosition"):Connect(fun
     end
 end)
 
-local function CleanRoomName(name)
-    if not name then return "global" end
-    name = name:gsub("^%s+", ""):gsub("%s+$", "")
-    name = string.lower(name)
-    name = name:gsub("%s+", "_")
-    if name == "" then return "global" end
-    return name
-end
-
 local function ConnectWebSocket()
     if isConnecting then return false end
     isConnecting = true
@@ -1683,7 +1674,7 @@ local function ConnectWebSocket()
     
     task.spawn(function()
         local success, socket = pcall(function()
-            return WebSocket.connect("wss://rbx-chat.rbxprojects.workers.dev/?room=" .. CleanRoomName(CurrentRoom))
+            return WebSocket.connect("wss://rbx-chat.rbxprojects.workers.dev/?room=" .. CurrentRoom)
         end)
         
         if CurrentConnection ~= ConnectionID then return end
@@ -1693,7 +1684,7 @@ local function ConnectWebSocket()
             SetStatus("Online")
             
             if notifyConnection then
-                SendNotification("RBX Chat", 'Conectado na sala "' .. CurrentRoom .. '".', 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
+                SendNotification("RBX Chat", 'Conectado na sala "' .. CurrentVisualRoom .. '".', 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
                 notifyConnection = false
             end
             
@@ -1736,12 +1727,23 @@ local function ConnectWebSocket()
     return true
 end
 
-SwitchRoom = function(newRoom)
-    if not newRoom or newRoom == "" then newRoom = "global" end
-    if CurrentRoom == newRoom then return end
-    CurrentRoom = newRoom
-    RoomTextBox.Text = CurrentRoom
-    CurrentRoomSection.Text = "Sala atual: " .. CurrentRoom
+SwitchRoom = function(visualName)
+    if not visualName or visualName == "" then visualName = "Global" end
+    local cleanName = CleanRoomName(visualName)
+    if CurrentRoom == cleanName then return end
+    
+    CurrentRoom = cleanName
+    CurrentVisualRoom = visualName
+    CurrentRoomSection.Text = "Sala atual: " .. CurrentVisualRoom
+    
+    for vName, btn in pairs(RoomButtons) do
+        local dot = btn:FindFirstChild("StatusDot")
+        if CleanRoomName(vName) == CurrentRoom then
+            if dot then dot.BackgroundColor3 = Color3.fromRGB(209, 250, 229) end
+        else
+            if dot then dot.BackgroundColor3 = Color3.fromRGB(254, 226, 226) end
+        end
+    end
     
     for _, child in ipairs(LMG2L["ScrollingFrame_4"]:GetChildren()) do
         if child:IsA("Frame") and child.Name == "MessageFrame" then
@@ -1754,7 +1756,7 @@ SwitchRoom = function(newRoom)
     end
     UpdateSearch()
     
-    SendNotification("RBX Chat", 'Conectando na sala "' .. CurrentRoom .. '"...', 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
+    SendNotification("RBX Chat", 'Conectando na sala "' .. CurrentVisualRoom .. '"...', 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
     notifyConnection = true
     if ws then
         pcall(function() ws:Close() end)
@@ -1762,14 +1764,6 @@ SwitchRoom = function(newRoom)
     end
     ConnectWebSocket()
 end
-
-RoomTextBox.FocusLost:Connect(function()
-    SwitchRoom(RoomTextBox.Text)
-end)
-
-GlobalBtn.MouseButton1Click:Connect(function()
-    SwitchRoom("global")
-end)
 
 task.spawn(function()
     while task.wait(3) do
