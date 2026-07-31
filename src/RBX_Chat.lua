@@ -613,9 +613,10 @@ end
 
 local HeadersContainer = Instance.new("Frame", RoomsFrame)
 HeadersContainer.Name = "HeadersContainer"
-HeadersContainer.Size = UDim2.new(1, 0, 0, 30)
+HeadersContainer.Size = UDim2.new(1, 0, 0, 0)
 HeadersContainer.BackgroundTransparency = 1
 HeadersContainer.LayoutOrder = 1
+HeadersContainer.AutomaticSize = Enum.AutomaticSize.Y
 
 local HeadersLayout = Instance.new("UIListLayout", HeadersContainer)
 HeadersLayout.Padding = UDim.new(0, 2)
