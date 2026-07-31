@@ -622,7 +622,7 @@ HeadersLayout.SortOrder = Enum.SortOrder.LayoutOrder
 local CurrentRoomSection = CreateSection("Sala atual: Global", HeadersContainer)
 CurrentRoomSection.LayoutOrder = 1
 
-local RoomsSection = CreateSection("Salas", HeadersContainer)
+local RoomsSection = CreateSection("Salas disponíveis", HeadersContainer)
 RoomsSection.LayoutOrder = 2
 
 local function CleanRoomName(name)
