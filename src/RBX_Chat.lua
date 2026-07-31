@@ -603,8 +603,11 @@ local function CreateSection(text, parent)
     sectionLabel.Text = text
     sectionLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     sectionLabel.FontFace = Font.new("rbxasset://fonts/families/BuilderSans.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-    sectionLabel.TextSize = 14
+    sectionLabel.TextSize = 16
     sectionLabel.TextXAlignment = Enum.TextXAlignment.Center
+    sectionLabel.TextWrapped = true
+    sectionLabel.AutomaticSize = Enum.AutomaticSize.Y
+    
     return sectionLabel
 end
 
