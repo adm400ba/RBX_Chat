@@ -349,6 +349,38 @@ function UILibrary:CreateYouTubeAudioPlayer(url, parent)
     titleLbl.TextXAlignment = Enum.TextXAlignment.Left
     titleLbl.TextTruncate = Enum.TextTruncate.AtEnd
 
+    local sizeLbl = Instance.new("TextLabel", aFrame)
+    sizeLbl.Size = UDim2.new(1, -94, 0, 0)
+    sizeLbl.Position = UDim2.new(0, 44, 0, 19)
+    sizeLbl.BackgroundTransparency = 1
+    sizeLbl.Text = ""
+    sizeLbl.Visible = false
+    sizeLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+    sizeLbl.FontFace = Font.new("rbxasset://fonts/families/BuilderSans.json")
+    sizeLbl.TextSize = 10
+    sizeLbl.TextXAlignment = Enum.TextXAlignment.Left
+    sizeLbl.AutomaticSize = Enum.AutomaticSize.Y
+
+    sizeLbl:GetPropertyChangedSignal("Visible"):Connect(function()
+    if sizeLbl.Visible then
+        titleLbl.Position = UDim2.new(0, 44, 0, 6)
+    else
+        titleLbl.Position = UDim2.new(0, 44, 0, 10)
+    end
+    end)
+
+    local filePath = "RBX_Chat/audio_files/" .. ytId .. ".mp3"
+    local isDownloaded = isfile(filePath)
+
+    if isDownloaded then
+        pcall(function()
+            local fileContent = readfile(filePath)
+            local sizeMB = #fileContent / (1024 * 1024)
+            sizeLbl.Text = string.format("%.2fMB", sizeMB)
+            sizeLbl.Visible = true
+        end)
+    end
+
     task.spawn(function()
         local s, r = pcall(function()
             return HttpRequest({
@@ -363,13 +395,22 @@ function UILibrary:CreateYouTubeAudioPlayer(url, parent)
             else
                 titleLbl.Text = "Desconhecido"
             end
+            
+            if not isDownloaded then
+                local estimatedSize = data.filesize or data.filesize_approx
+                if estimatedSize then
+                    local sizeMB = estimatedSize / (1024 * 1024)
+                    sizeLbl.Text = string.format("~%.2fMB", sizeMB)
+                    sizeLbl.Visible = true
+                else
+                    sizeLbl.Text = "Tamanho desconhecido" 
+                    sizeLbl.Visible = true
+                end
+            end
         else
             titleLbl.Text = "Desconhecido"
         end
     end)
-
-    local filePath = "RBX_Chat/audio_files/" .. ytId .. ".mp3"
-    local isDownloaded = isfile(filePath)
 
     local pBtn = Instance.new("ImageButton", aFrame)
     pBtn.Size = UDim2.new(0, 28, 0, 28)
@@ -512,6 +553,10 @@ function UILibrary:CreateYouTubeAudioPlayer(url, parent)
                     isDownloaded = true
                     snd.SoundId = getcustomasset(filePath)
                     pBtn.Image = getcustomasset("RBX_Chat/assets/circle-play.png")
+                    
+                    local sizeMB = #r.Body / (1024 * 1024)
+                    sizeLbl.Text = string.format("%.2fMB", sizeMB)
+                    sizeLbl.Visible = true
                 else
                     pBtn.Image = getcustomasset("RBX_Chat/assets/download.png")
                 end
@@ -1983,11 +2028,12 @@ local function ConnectWebSocket()
             
             pcall(function()
                 socket.OnMessage:Connect(function(msg)
-                    if CurrentConnection ~= ConnectionID then return end
-                    LMG2L["Loading_17"]["Visible"] = false
+                    if CurrentConnection ~= ConnectionID then return end                    
                     local s, data = pcall(function() return HttpService:JSONDecode(msg) end)
                     if s and data.username and data.text then
-                        ReceiveMessage(data.username, data.userId, data.text, data.timestamp)
+                        if data.userId ~= Player.UserId then
+                            ReceiveMessage(data.username, data.userId, data.text, data.timestamp)
+                        end
                     end
                 end)
             end)
@@ -2070,29 +2116,34 @@ end)
 local IsSending = false
 LMG2L["SendMessage_1c"].MouseButton1Click:Connect(function()
     if IsSending then return end
+    
+    if not ws then
+        SendNotification("RBX Chat", "Não conectado, por favor aguarde.", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
+        return
+    end
+
     local Text = LMG2L["TextBox_19"].Text
     
     if Text:match("%S") or Text:match(":sticker:%d+:") or Text:match(":audio:%d+:") or Text:match(":audio:https?://[^:]+:") then
         IsSending = true
         LMG2L["Loading_17"]["Visible"] = true
         
-        if not ws and not isConnecting then
-            ConnectWebSocket()
-        end
+        local data = {
+            username = Player.DisplayName,
+            userId = Player.UserId,
+            text = Text,
+            timestamp = DateTime.now():ToIsoDate()
+        }
         
-        if ws then
-            local data = {
-                username = Player.DisplayName,
-                userId = Player.UserId,
-                text = Text,
-                timestamp = DateTime.now():ToIsoDate()
-            }
-            
+        task.spawn(function()
             local success, err = pcall(function()
                 ws:Send(HttpService:JSONEncode(data))
             end)
             
-            if not success then
+            if success then
+                LMG2L["Loading_17"]["Visible"] = false
+                ReceiveMessage(Player.DisplayName, Player.UserId, Text, data.timestamp)
+            else
                 LMG2L["Loading_17"]["Visible"] = false
                 SendNotification("RBX Chat", "Erro na conexão. Tente enviar novamente.", 3,  getcustomasset("RBX_Chat/assets/message-square-more.png"))
                 if ws then
@@ -2101,14 +2152,11 @@ LMG2L["SendMessage_1c"].MouseButton1Click:Connect(function()
                 end
                 SetStatus("Offline")
             end
-        else
-            LMG2L["Loading_17"]["Visible"] = false
-            SendNotification("RBX Chat", "Modo Offline ativo. Servidor indisponível.", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-            ReceiveMessage(Player.DisplayName, Player.UserId, Text, DateTime.now():ToIsoDate())
-        end
+            
+            IsSending = false
+        end)
         
         LMG2L["TextBox_19"].Text = ""
-        IsSending = false
     end
 end)
 
