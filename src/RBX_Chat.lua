@@ -394,7 +394,7 @@ function UILibrary:CreateYouTubeAudioPlayer(url, parent)
     if isDownloaded then
         pcall(function()
             local fileContent = readfile(filePath)
-            sizeLbl.Text = formatSize(#fileContent)
+            sizeLbl.Text = FormatSize(#fileContent)
             sizeLbl.Visible = true
         end)
     end
@@ -417,7 +417,7 @@ function UILibrary:CreateYouTubeAudioPlayer(url, parent)
             if not isDownloaded then
                 local estimatedSize = data.filesize or data.filesize_approx
                 if estimatedSize then
-                    sizeLbl.Text = "~" .. formatSize(estimatedSize)
+                    sizeLbl.Text = "~" .. FormatSize(estimatedSize)
                     sizeLbl.Visible = true
                 else
                     sizeLbl.Text = "Tamanho desconhecido" 
