@@ -2039,17 +2039,13 @@ local function ConnectWebSocket()
                 notifyConnection = false
             end
             
-                pcall(function()
+            pcall(function()
                 socket.OnMessage:Connect(function(msg)
-                    if CurrentConnection ~= ConnectionID then return end                    
+                    if CurrentConnection ~= ConnectionID then return end
+                    LMG2L["Loading_17"]["Visible"] = false
                     local s, data = pcall(function() return HttpService:JSONDecode(msg) end)
                     if s and data.username and data.text then
                         ReceiveMessage(data.username, data.userId, data.text, data.timestamp)
-                        
-                        if data.userId == Player.UserId then
-                            LMG2L["Loading_17"]["Visible"] = false
-                            IsSending = false
-                        end
                     end
                 end)
             end)
@@ -2131,31 +2127,46 @@ end)
 
 local IsSending = false
 LMG2L["SendMessage_1c"].MouseButton1Click:Connect(function()
-    if not ws then
-        SendNotification("RBX Chat", "Não conectado, por favor aguarde.", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-        return
-    end
-
+    if IsSending then return end
     local Text = LMG2L["TextBox_19"].Text
     
-    if Text:match("%S") or Text:match(":sticker:%d+:") or Text:match(":audio:%d+:") or Text:match(":audio:https?://[^:]+:") then
+    if Text:match("%S") or Text:match(":sticker:%d+:") or Text:match(":audio:%d+:") then
+        IsSending = true
         LMG2L["Loading_17"]["Visible"] = true
         
-        local data = {
-            username = Player.DisplayName,
-            userId = Player.UserId,
-            text = Text,
-            timestamp = DateTime.now():ToIsoDate()
-        }
+        if not ws and not isConnecting then
+            ConnectWebSocket()
+        end
         
-        task.spawn(function()
-            pcall(function()
+        if ws then
+            local data = {
+                username = Player.DisplayName,
+                userId = Player.UserId,
+                text = Text,
+                timestamp = DateTime.now():ToIsoDate()
+            }
+            
+            local success, err = pcall(function()
                 ws:Send(HttpService:JSONEncode(data))
             end)
+            
+            if not success then
+                LMG2L["Loading_17"]["Visible"] = false
+                SendNotification("RBX Chat", "Erro na conexão. Tente enviar novamente.", 3,  getcustomasset("RBX_Chat/assets/message-square-more.png"))
+                if ws then
+                    pcall(function() ws:Close() end)
+                    ws = nil
+                end
+                SetStatus("Offline")
+            end
+        else
             LMG2L["Loading_17"]["Visible"] = false
-        end)
+            SendNotification("RBX Chat", "Modo Offline ativo. Servidor indisponível.", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
+            ReceiveMessage(Player.DisplayName, Player.UserId, Text, DateTime.now():ToIsoDate())
+        end
         
         LMG2L["TextBox_19"].Text = ""
+        IsSending = false
     end
 end)
 
