@@ -71,6 +71,7 @@ PreDownloadAsset("message-square-more.png")
 MakeFolder("RBX_Chat/stickers")
 MakeFolder("RBX_Chat/audios")
 MakeFolder("RBX_Chat/rooms")
+MakeFolder("RBX_Chat/audio_files")
 
 PreDownloadLuaFile("rooms/Global.lua")
 
@@ -89,6 +90,7 @@ DownloadAsset("audio-lines.png")
 DownloadAsset("sticker.png")
 DownloadAsset("search.png")
 DownloadAsset("users.png")
+DownloadAsset("download.png")
 
 PreDownloadLuaFile("stickers/Stickers.lua")
 DownloadLuaFile("stickers/More-Stickers.lua")
@@ -291,6 +293,279 @@ function UILibrary:CreateAudioPlayer(id, title, parent)
 
     table.insert(conns, RunService.RenderStepped:Connect(function()
         if snd.IsLoaded and snd.TimeLength > 0 then
+            if isPlaying and not dragging then
+                barFill.Size = UDim2.new(snd.TimePosition / snd.TimeLength, 0, 1, 0)
+                timeLbl.Text = formatTime(snd.TimePosition)
+            elseif not isPlaying and not dragging and barFill.Size.X.Scale == 0 then
+                timeLbl.Text = formatTime(snd.TimeLength)
+            end
+        end
+    end))
+
+    aFrame.Destroying:Connect(function()
+        for _, c in ipairs(conns) do
+            c:Disconnect()
+        end
+        if getgenv().ActiveChatAudio == selfAudio then
+            getgenv().ActiveChatAudio = nil
+        end
+    end)
+
+    return aFrame
+end
+
+function UILibrary:CreateYouTubeAudioPlayer(url, parent)
+    local ytId =
+        url:match("[?&]v=([%w_-]+)") or
+        url:match("youtu%.be/([%w_-]+)") or
+        url:match("youtube%.com/embed/([%w_-]+)") or
+        url:match("youtube%.com/shorts/([%w_-]+)")
+
+    if not ytId then
+        ytId = tostring(math.random(100000, 999999))
+    end
+
+    local aFrame = Instance.new("Frame", parent)
+    aFrame.Size = UDim2.new(0, 240, 0, 54)
+    aFrame.BackgroundColor3 = Color3.fromRGB(51, 51, 51)
+    aFrame.BackgroundTransparency = 0.4
+    aFrame.BorderSizePixel = 0
+
+    local aCorner = Instance.new("UICorner", aFrame)
+    aCorner.CornerRadius = UDim.new(0, 8)
+
+    local aStroke = Instance.new("UIStroke", aFrame)
+    aStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    aStroke.Color = Color3.fromRGB(63, 63, 63)
+
+    local titleLbl = Instance.new("TextLabel", aFrame)
+    titleLbl.Size = UDim2.new(1, -52, 0, 14)
+    titleLbl.Position = UDim2.new(0, 44, 0, 10)
+    titleLbl.BackgroundTransparency = 1
+    titleLbl.Text = "Carregando Informações..."
+    titleLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLbl.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+    titleLbl.TextSize = 12
+    titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+    titleLbl.TextTruncate = Enum.TextTruncate.AtEnd
+
+    task.spawn(function()
+        local s, r = pcall(function()
+            return HttpRequest({
+                Url = "https://yt-dlp-endpoint-production-62a9.up.railway.app/info?url=" .. url,
+                Method = "GET"
+            })
+        end)
+        if s and r and r.StatusCode == 200 then
+            local data = HttpService:JSONDecode(r.Body)
+            if data and data.title then
+                titleLbl.Text = data.title
+            else
+                titleLbl.Text = "Desconhecido"
+            end
+        else
+            titleLbl.Text = "Desconhecido"
+        end
+    end)
+
+    local filePath = "RBX_Chat/audio_files/" .. ytId .. ".mp3"
+    local isDownloaded = isfile(filePath)
+
+    local pBtn = Instance.new("ImageButton", aFrame)
+    pBtn.Size = UDim2.new(0, 28, 0, 28)
+    pBtn.Position = UDim2.new(0, 8, 0.5, -14)
+    pBtn.BackgroundTransparency = 1
+    pBtn.ImageColor3 = Color3.fromRGB(255, 255, 255)
+
+    local loadingImg = Instance.new("ImageLabel", aFrame)
+    loadingImg.Size = UDim2.new(0, 28, 0, 28)
+    loadingImg.Position = UDim2.new(0, 8, 0.5, -14)
+    loadingImg.BackgroundTransparency = 1
+    loadingImg.Image = getcustomasset("RBX_Chat/assets/loading.png")
+    loadingImg.Visible = false
+
+    if isDownloaded then
+        pBtn.Image = getcustomasset("RBX_Chat/assets/circle-play.png")
+    else
+        pBtn.Image = getcustomasset("RBX_Chat/assets/download.png")
+    end
+
+    local timeLbl = Instance.new("TextLabel", aFrame)
+    timeLbl.Size = UDim2.new(0, 35, 0, 24)
+    timeLbl.Position = UDim2.new(1, -43, 0, 23)
+    timeLbl.BackgroundTransparency = 1
+    timeLbl.Text = "0:00"
+    timeLbl.TextColor3 = Color3.fromRGB(200, 200, 200)
+    timeLbl.FontFace = Font.new("rbxasset://fonts/families/BuilderSans.json")
+    timeLbl.TextSize = 12
+    timeLbl.TextXAlignment = Enum.TextXAlignment.Right
+
+    local barBg = Instance.new("TextButton", aFrame)
+    barBg.Size = UDim2.new(1, -94, 0, 6)
+    barBg.Position = UDim2.new(0, 44, 0, 32)
+    barBg.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    barBg.AutoButtonColor = false
+    barBg.Text = ""
+
+    local barCorner = Instance.new("UICorner", barBg)
+    barCorner.CornerRadius = UDim.new(1, 0)
+
+    local barFill = Instance.new("Frame", barBg)
+    barFill.Size = UDim2.new(0, 0, 1, 0)
+    barFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    barFill.BorderSizePixel = 0
+
+    local fillCorner = Instance.new("UICorner", barFill)
+    fillCorner.CornerRadius = UDim.new(1, 0)
+
+    local grabber = Instance.new("Frame", barFill)
+    grabber.Size = UDim2.new(0, 10, 0, 10)
+    grabber.Position = UDim2.new(1, -5, 0.5, -5)
+    grabber.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    
+    local grabberCorner = Instance.new("UICorner", grabber)
+    grabberCorner.CornerRadius = UDim.new(1, 0)
+
+    local snd = Instance.new("Sound", aFrame)
+    if isDownloaded then
+        snd.SoundId = getcustomasset(filePath)
+    end
+    snd.Volume = 1
+
+    local isPlaying = false
+    local dragging = false
+    local isDownloading = false
+    local conns = {}
+    local selfAudio = {}
+
+    local function formatTime(seconds)
+        if not seconds or seconds ~= seconds then seconds = 0 end
+        local m = math.floor(seconds / 60)
+        local s = math.floor(seconds % 60)
+        return string.format("%d:%02d", m, s)
+    end
+
+    local function updateScrub(xPos)
+        local rel = math.clamp((xPos - barBg.AbsolutePosition.X) / barBg.AbsoluteSize.X, 0, 1)
+        if snd.IsLoaded and snd.TimeLength > 0 then
+            snd.TimePosition = rel * snd.TimeLength
+            barFill.Size = UDim2.new(rel, 0, 1, 0)
+            timeLbl.Text = formatTime(snd.TimePosition)
+        end
+    end
+
+    selfAudio.Frame = aFrame
+    selfAudio.IsPlaying = function() return isPlaying end
+
+    selfAudio.Pause = function()
+        if isPlaying then
+            snd:Pause()
+            pBtn.Image = getcustomasset("RBX_Chat/assets/circle-play.png")
+            isPlaying = false
+        end
+    end
+
+    selfAudio.Stop = function()
+        snd:Pause()
+        snd.TimePosition = 0
+        pBtn.Image = getcustomasset("RBX_Chat/assets/circle-play.png")
+        isPlaying = false
+        barFill.Size = UDim2.new(0, 0, 1, 0)
+        timeLbl.Text = formatTime(snd.TimeLength)
+    end
+
+    selfAudio.Play = function()
+        if not isPlaying and isDownloaded then
+            if not snd.IsLoaded then
+                snd.Loaded:Wait()
+            end
+            snd:Resume()
+            pBtn.Image = getcustomasset("RBX_Chat/assets/circle-pause.png")
+            isPlaying = true
+        end
+    end
+
+    selfAudio.GetTimeText = function()
+        if snd.IsLoaded then
+            return formatTime(snd.TimePosition)
+        end
+        return "0:00"
+    end
+
+    pBtn.MouseButton1Click:Connect(function()
+        if not isDownloaded then
+            if isDownloading then return end
+            isDownloading = true
+            pBtn.Visible = false
+            loadingImg.Visible = true
+            
+            task.spawn(function()
+                local s, r = pcall(function()
+                    return HttpRequest({
+                        Url = "https://yt-dlp-endpoint-production-62a9.up.railway.app/mp3?url=" .. url,
+                        Method = "GET"
+                    })
+                end)
+                
+                if s and r and r.StatusCode == 200 and #r.Body > 100 then
+                    writefile(filePath, r.Body)
+                    isDownloaded = true
+                    snd.SoundId = getcustomasset(filePath)
+                    pBtn.Image = getcustomasset("RBX_Chat/assets/circle-play.png")
+                else
+                    pBtn.Image = getcustomasset("RBX_Chat/assets/download.png")
+                end
+                isDownloading = false
+                loadingImg.Visible = false
+                pBtn.Visible = true
+            end)
+        else
+            if isPlaying then
+                selfAudio.Pause()
+            else
+                if getgenv().ActiveChatAudio and getgenv().ActiveChatAudio ~= selfAudio then
+                    getgenv().ActiveChatAudio.Stop()
+                end
+                selfAudio.Play()
+                getgenv().ActiveChatAudio = selfAudio
+            end
+        end
+    end)
+
+    table.insert(conns, snd.Ended:Connect(function()
+        isPlaying = false
+        pBtn.Image = getcustomasset("RBX_Chat/assets/circle-play.png")
+        barFill.Size = UDim2.new(0, 0, 1, 0)
+        timeLbl.Text = formatTime(snd.TimeLength)
+        if getgenv().ActiveChatAudio == selfAudio then
+            getgenv().ActiveChatAudio = nil
+        end
+    end))
+
+    barBg.InputBegan:Connect(function(input)
+        if isDownloaded and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+            dragging = true
+            updateScrub(input.Position.X)
+        end
+    end)
+
+    table.insert(conns, UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            updateScrub(input.Position.X)
+        end
+    end))
+
+    table.insert(conns, UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end))
+
+    table.insert(conns, RunService.RenderStepped:Connect(function()
+        if loadingImg.Visible then
+            loadingImg.Rotation = loadingImg.Rotation + 5
+        end
+        if isDownloaded and snd.IsLoaded and snd.TimeLength > 0 then
             if isPlaying and not dragging then
                 barFill.Size = UDim2.new(snd.TimePosition / snd.TimeLength, 0, 1, 0)
                 timeLbl.Text = formatTime(snd.TimePosition)
@@ -751,32 +1026,17 @@ end
 
 task.spawn(function()
     pcall(function()
-        local response = readfile("RBX_Chat/audios/Audios.lua")
-        if response then
-            for line in response:gmatch("[^\r\n]+") do
-                local id, name = line:match("^(%d+)%s*%-%-%s*(.*)")
-                if not id then
-                    id = line:match("^(%d+)")
-                end
-                if id then
-                    AddAudioTabItem(tonumber(id), name)
-                end
-            end
-        end
-    end)
-end)
-
-task.spawn(function()
-    pcall(function()
-        local response2 = readfile("RBX_Chat/audios/More-Audios.lua")
-        if response2 then
-            for line2 in response2:gmatch("[^\r\n]+") do
-                local id2, name2 = line2:match("^(%d+)%s*%-%-%s*(.*)")
-                if not id2 then
-                    id2 = line2:match("^(%d+)")
-                end
-                if id2 then
-                    AddAudioTabItem(tonumber(id2), name2)
+        for _, file in ipairs(listfiles("RBX_Chat/audios")) do
+            if file:sub(-4) == ".lua" then
+                local response = readfile(file)
+                for line in response:gmatch("[^\r\n]+") do
+                local id, name = line:match("^([^%s]+)%s*%-%-%s*(.*)")
+                    if not id then
+                    id = line:match("^([^%s]+)")
+                    end
+                    if id then
+                    AddAudioTabItem(id, name)
+                    end
                 end
             end
         end
@@ -1465,7 +1725,7 @@ local function ReceiveMessage(username, userId, text, timestamp)
     if text:match(":sticker:%d+:") then
         rawForSearch = rawForSearch .. " figurinha sticker"
     end
-    if text:match(":audio:%d+:") then
+    if text:match(":audio:%d+:") or text:match(":audio:https?://[^:]+:") then
         rawForSearch = rawForSearch .. " audio"
     end
     NewMessage:SetAttribute("RawText", rawForSearch)
@@ -1491,6 +1751,7 @@ local function ReceiveMessage(username, userId, text, timestamp)
     end)
 
     local textOnly = text:gsub(":audio:%d+:", ""):gsub(":sticker:%d+:", "")
+    textOnly = textOnly:gsub(":audio:https?://[^:]+:", "")
     textOnly = textOnly:gsub("^%s+", ""):gsub("%s+$", "")
     
     if textOnly == "" then
@@ -1542,7 +1803,12 @@ local function ReceiveMessage(username, userId, text, timestamp)
         UILibrary:CreateAudioPlayer(id, title, AudioContainer)
     end
 
-    local textForStickers = text:gsub(":audio:%d+:", "")
+    for ytUrl in text:gmatch(":audio:(https?://[^:]+):") do
+        hasAttachments = true
+        UILibrary:CreateYouTubeAudioPlayer(ytUrl, AudioContainer)
+    end
+
+    local textForStickers = text:gsub(":audio:%d+:", ""):gsub(":audio:https?://[^:]+:", "")
     for id in textForStickers:gmatch(":sticker:(%d+):") do
         hasAttachments = true
         local img = Instance.new("ImageLabel", StickerContainer)
@@ -1627,6 +1893,10 @@ local function ReceiveMessage(username, userId, text, timestamp)
    
     local AudioCount = 0
     local NotifyText = text:gsub(":audio:%d+:", function()
+        AudioCount += 1
+        return ""
+    end)
+    NotifyText = NotifyText:gsub(":audio:https?://[^:]+:", function()
         AudioCount += 1
         return ""
     end)
@@ -1802,7 +2072,7 @@ LMG2L["SendMessage_1c"].MouseButton1Click:Connect(function()
     if IsSending then return end
     local Text = LMG2L["TextBox_19"].Text
     
-    if Text:match("%S") or Text:match(":sticker:%d+:") or Text:match(":audio:%d+:") then
+    if Text:match("%S") or Text:match(":sticker:%d+:") or Text:match(":audio:%d+:") or Text:match(":audio:https?://[^:]+:") then
         IsSending = true
         LMG2L["Loading_17"]["Visible"] = true
         
