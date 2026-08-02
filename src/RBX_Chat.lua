@@ -235,11 +235,23 @@ function UILibrary:CreateAudioPlayer(id, title, parent)
     selfAudio.Play = function()
         if not isPlaying then
             if not snd.IsLoaded then
-                snd.Loaded:Wait()
+                local loadSuccess = pcall(function() snd.Loaded:Wait() end)
+                if not loadSuccess then
+                    SendNotification("RBX Chat", "Falha ao reproduzir o áudio.", 5, getcustomasset("RBX_Chat/assets/message-square-more.png"))
+                    return
+                end
             end
-            snd:Resume()
-            pBtn.Image = getcustomasset("RBX_Chat/assets/circle-pause.png")
-            isPlaying = true
+            
+            local success, err = pcall(function()
+                snd:Resume()
+            end)
+            
+            if success then
+                pBtn.Image = getcustomasset("RBX_Chat/assets/circle-pause.png")
+                isPlaying = true
+            else
+                SendNotification("RBX Chat", "Falha ao reproduzir o áudio.", 5, getcustomasset("RBX_Chat/assets/message-square-more.png"))
+            end
         end
     end
 
@@ -518,11 +530,23 @@ function UILibrary:CreateYouTubeAudioPlayer(url, parent)
     selfAudio.Play = function()
         if not isPlaying and isDownloaded then
             if not snd.IsLoaded then
-                snd.Loaded:Wait()
+                local loadSuccess = pcall(function() snd.Loaded:Wait() end)
+                if not loadSuccess then
+                    SendNotification("RBX Chat", "Falha ao reproduzir o áudio.", 5, getcustomasset("RBX_Chat/assets/message-square-more.png"))
+                    return
+                end
             end
-            snd:Resume()
-            pBtn.Image = getcustomasset("RBX_Chat/assets/circle-pause.png")
-            isPlaying = true
+            
+            local success, err = pcall(function()
+                snd:Resume()
+            end)
+            
+            if success then
+                pBtn.Image = getcustomasset("RBX_Chat/assets/circle-pause.png")
+                isPlaying = true
+            else
+                SendNotification("RBX Chat", "Falha ao reproduzir o áudio.", 5, getcustomasset("RBX_Chat/assets/message-square-more.png"))
+            end
         end
     end
 
@@ -549,16 +573,25 @@ function UILibrary:CreateYouTubeAudioPlayer(url, parent)
                 end)
                 
                 if s and r and r.StatusCode == 200 and #r.Body > 100 then
-                    writefile(filePath, r.Body)
-                    isDownloaded = true
-                    snd.SoundId = getcustomasset(filePath)
-                    pBtn.Image = getcustomasset("RBX_Chat/assets/circle-play.png")
+                    local writeSuccess = pcall(function()
+                        writefile(filePath, r.Body)
+                    end)
                     
-                    local sizeMB = #r.Body / (1024 * 1024)
-                    sizeLbl.Text = string.format("%.2fMB", sizeMB)
-                    sizeLbl.Visible = true
+                    if writeSuccess then
+                        isDownloaded = true
+                        snd.SoundId = getcustomasset(filePath)
+                        pBtn.Image = getcustomasset("RBX_Chat/assets/circle-play.png")
+                        
+                        local sizeMB = #r.Body / (1024 * 1024)
+                        sizeLbl.Text = string.format("%.2fMB", sizeMB)
+                        sizeLbl.Visible = true
+                    else
+                        pBtn.Image = getcustomasset("RBX_Chat/assets/download.png")
+                        SendNotification("RBX Chat", "Falha ao salvar o áudio baixado.", 5, getcustomasset("RBX_Chat/assets/message-square-more.png"))
+                    end
                 else
                     pBtn.Image = getcustomasset("RBX_Chat/assets/download.png")
+                    SendNotification("RBX Chat", "Falha ao baixar o áudio.", 5, getcustomasset("RBX_Chat/assets/message-square-more.png"))
                 end
                 isDownloading = false
                 loadingImg.Visible = false
