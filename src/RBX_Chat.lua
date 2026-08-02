@@ -63,6 +63,23 @@ local function DownloadLuaFile(path)
     end
 end
 
+local function FormatSize(bytes)
+    local units = {"B", "KB", "MB", "GB", "TB"}
+    local size = bytes
+    local unit = 1
+
+    while size >= 1024 and unit < #units do
+        size = size / 1024
+        unit = unit + 1
+    end
+
+    if unit == 1 then
+        return string.format("%d%s", size, units[unit])
+    else
+        return string.format("%.2f%s", size, units[unit])
+    end
+end
+
 MakeFolder("RBX_Chat")
 MakeFolder("RBX_Chat/assets")
 
@@ -377,8 +394,7 @@ function UILibrary:CreateYouTubeAudioPlayer(url, parent)
     if isDownloaded then
         pcall(function()
             local fileContent = readfile(filePath)
-            local sizeMB = #fileContent / (1024 * 1024)
-            sizeLbl.Text = string.format("%.2fMB", sizeMB)
+            sizeLbl.Text = formatSize(#fileContent)
             sizeLbl.Visible = true
         end)
     end
@@ -401,8 +417,7 @@ function UILibrary:CreateYouTubeAudioPlayer(url, parent)
             if not isDownloaded then
                 local estimatedSize = data.filesize or data.filesize_approx
                 if estimatedSize then
-                    local sizeMB = estimatedSize / (1024 * 1024)
-                    sizeLbl.Text = string.format("~%.2fMB", sizeMB)
+                    sizeLbl.Text = "~" .. formatSize(estimatedSize)
                     sizeLbl.Visible = true
                 else
                     sizeLbl.Text = "Tamanho desconhecido" 
