@@ -2039,7 +2039,7 @@ local function ConnectWebSocket()
                 notifyConnection = false
             end
             
-                        pcall(function()
+                pcall(function()
                 socket.OnMessage:Connect(function(msg)
                     if CurrentConnection ~= ConnectionID then return end                    
                     local s, data = pcall(function() return HttpService:JSONDecode(msg) end)
@@ -2151,15 +2151,12 @@ LMG2L["SendMessage_1c"].MouseButton1Click:Connect(function()
             timestamp = DateTime.now():ToIsoDate()
         }
         
-        task.spawn(function()
+            task.spawn(function()
             local success, err = pcall(function()
                 ws:Send(HttpService:JSONEncode(data))
             end)
             
-            if success then
-                LMG2L["Loading_17"]["Visible"] = false
-                ReceiveMessage(Player.DisplayName, Player.UserId, Text, data.timestamp)
-            else
+            if not success then
                 LMG2L["Loading_17"]["Visible"] = false
                 SendNotification("RBX Chat", "Erro na conexão. Tente enviar novamente.", 3,  getcustomasset("RBX_Chat/assets/message-square-more.png"))
                 if ws then
@@ -2167,9 +2164,8 @@ LMG2L["SendMessage_1c"].MouseButton1Click:Connect(function()
                     ws = nil
                 end
                 SetStatus("Offline")
+                IsSending = false
             end
-            
-            IsSending = false
         end)
         
         LMG2L["TextBox_19"].Text = ""
