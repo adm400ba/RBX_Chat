@@ -187,9 +187,11 @@ function UILibrary:CreateAudioPlayer(id, title, parent)
     local grabberCorner = Instance.new("UICorner", grabber)
     grabberCorner.CornerRadius = UDim.new(1, 0)
 
+    pcall(function()
     local snd = Instance.new("Sound", aFrame)
     snd.SoundId = "rbxassetid://" .. id
     snd.Volume = 1
+    end)
 
     local isPlaying = false
     local dragging = false
@@ -235,23 +237,11 @@ function UILibrary:CreateAudioPlayer(id, title, parent)
     selfAudio.Play = function()
         if not isPlaying then
             if not snd.IsLoaded then
-                local loadSuccess = pcall(function() snd.Loaded:Wait() end)
-                if not loadSuccess then
-                    SendNotification("RBX Chat", "Falha ao reproduzir o áudio.", 5, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-                    return
-                end
+                snd.Loaded:Wait()
             end
-            
-            local success, err = pcall(function()
-                snd:Resume()
-            end)
-            
-            if success then
-                pBtn.Image = getcustomasset("RBX_Chat/assets/circle-pause.png")
-                isPlaying = true
-            else
-                SendNotification("RBX Chat", "Falha ao reproduzir o áudio.", 5, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-            end
+            snd:Resume()
+            pBtn.Image = getcustomasset("RBX_Chat/assets/circle-pause.png")
+            isPlaying = true
         end
     end
 
@@ -530,23 +520,11 @@ function UILibrary:CreateYouTubeAudioPlayer(url, parent)
     selfAudio.Play = function()
         if not isPlaying and isDownloaded then
             if not snd.IsLoaded then
-                local loadSuccess = pcall(function() snd.Loaded:Wait() end)
-                if not loadSuccess then
-                    SendNotification("RBX Chat", "Falha ao reproduzir o áudio.", 5, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-                    return
-                end
+                snd.Loaded:Wait()
             end
-            
-            local success, err = pcall(function()
-                snd:Resume()
-            end)
-            
-            if success then
-                pBtn.Image = getcustomasset("RBX_Chat/assets/circle-pause.png")
-                isPlaying = true
-            else
-                SendNotification("RBX Chat", "Falha ao reproduzir o áudio.", 5, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-            end
+            snd:Resume()
+            pBtn.Image = getcustomasset("RBX_Chat/assets/circle-pause.png")
+            isPlaying = true
         end
     end
 
@@ -579,7 +557,9 @@ function UILibrary:CreateYouTubeAudioPlayer(url, parent)
                     
                     if writeSuccess then
                         isDownloaded = true
+                        pcall(function()
                         snd.SoundId = getcustomasset(filePath)
+                        end)
                         pBtn.Image = getcustomasset("RBX_Chat/assets/circle-play.png")
                         
                         local sizeMB = #r.Body / (1024 * 1024)
