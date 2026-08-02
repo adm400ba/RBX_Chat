@@ -2039,13 +2039,16 @@ local function ConnectWebSocket()
                 notifyConnection = false
             end
             
-            pcall(function()
+                        pcall(function()
                 socket.OnMessage:Connect(function(msg)
                     if CurrentConnection ~= ConnectionID then return end                    
                     local s, data = pcall(function() return HttpService:JSONDecode(msg) end)
                     if s and data.username and data.text then
-                        if data.userId ~= Player.UserId then
-                            ReceiveMessage(data.username, data.userId, data.text, data.timestamp)
+                        ReceiveMessage(data.username, data.userId, data.text, data.timestamp)
+                        
+                        if data.userId == Player.UserId then
+                            LMG2L["Loading_17"]["Visible"] = false
+                            IsSending = false
                         end
                     end
                 end)
