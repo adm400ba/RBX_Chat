@@ -2131,8 +2131,6 @@ end)
 
 local IsSending = false
 LMG2L["SendMessage_1c"].MouseButton1Click:Connect(function()
-    if IsSending then return end
-    
     if not ws then
         SendNotification("RBX Chat", "Não conectado, por favor aguarde.", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
         return
@@ -2141,7 +2139,6 @@ LMG2L["SendMessage_1c"].MouseButton1Click:Connect(function()
     local Text = LMG2L["TextBox_19"].Text
     
     if Text:match("%S") or Text:match(":sticker:%d+:") or Text:match(":audio:%d+:") or Text:match(":audio:https?://[^:]+:") then
-        IsSending = true
         LMG2L["Loading_17"]["Visible"] = true
         
         local data = {
@@ -2151,21 +2148,11 @@ LMG2L["SendMessage_1c"].MouseButton1Click:Connect(function()
             timestamp = DateTime.now():ToIsoDate()
         }
         
-            task.spawn(function()
-            local success, err = pcall(function()
+        task.spawn(function()
+            pcall(function()
                 ws:Send(HttpService:JSONEncode(data))
             end)
-            
-            if not success then
-                LMG2L["Loading_17"]["Visible"] = false
-                SendNotification("RBX Chat", "Erro na conexão. Tente enviar novamente.", 3,  getcustomasset("RBX_Chat/assets/message-square-more.png"))
-                if ws then
-                    pcall(function() ws:Close() end)
-                    ws = nil
-                end
-                SetStatus("Offline")
-                IsSending = false
-            end
+            LMG2L["Loading_17"]["Visible"] = false
         end)
         
         LMG2L["TextBox_19"].Text = ""
