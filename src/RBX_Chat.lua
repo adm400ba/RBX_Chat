@@ -204,8 +204,8 @@ function UILibrary:CreateAudioPlayer(id, title, parent)
     local grabberCorner = Instance.new("UICorner", grabber)
     grabberCorner.CornerRadius = UDim.new(1, 0)
 
-    pcall(function()
     local snd = Instance.new("Sound", aFrame)
+    pcall(function()
     snd.SoundId = "rbxassetid://" .. id
     snd.Volume = 1
     end)
