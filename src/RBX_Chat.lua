@@ -1443,6 +1443,8 @@ MessageTemplate.Parent = nil
 
 local ws
 local UnreadMessagesCount = 0
+local MessageQueue = {}
+local MAX_MESSAGES = 50
 local FirstUnreadTime = ""
 local notifyConnection = false
 
@@ -1984,12 +1986,15 @@ local function ReceiveMessage(username, userId, text, timestamp)
         end
     end
     
-    task.delay(1000, function()
-        if NewMessage and NewMessage.Parent then
-            NewMessage:Destroy()
-        end
-    end)
-   
+    table.insert(MessageQueue, NewMessage)
+
+    if #MessageQueue > MAX_MESSAGES then
+    local oldestMessage = table.remove(MessageQueue, 1)
+    if oldestMessage and oldestMessage.Parent then
+        oldestMessage:Destroy()
+    end
+    end
+
     local AudioCount = 0
     local NotifyText = text:gsub(":audio:%d+:", function()
         AudioCount += 1
