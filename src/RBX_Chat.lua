@@ -1827,7 +1827,13 @@ local function ReceiveMessage(username, userId, text, timestamp)
     textOnly = textOnly:gsub(":audio:https?://[^:]+:", "")
     textOnly = textOnly:gsub("^%s+", ""):gsub("%s+$", "")
     
-    if textOnly == "" then
+    local checkEmpty = textOnly
+    checkEmpty = checkEmpty:gsub("%[%w+=?[^%]]*%]", "")
+    checkEmpty = checkEmpty:gsub("%[/%w+%]", "")
+    checkEmpty = checkEmpty:gsub("[%*_~]", "")
+    checkEmpty = checkEmpty:gsub("%s+", "")
+    
+    if checkEmpty == "" then
         NewMessage.MessageContent.Text.Visible = false
     else
         NewMessage.MessageContent.Text.Text = FormatMarkdown(textOnly)
