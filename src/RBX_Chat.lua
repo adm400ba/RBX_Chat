@@ -108,6 +108,7 @@ DownloadAsset("sticker.png")
 DownloadAsset("search.png")
 DownloadAsset("users.png")
 DownloadAsset("download.png")
+DownloadAsset("arrow-down.png")
 
 PreDownloadLuaFile("stickers/Stickers.lua")
 DownloadLuaFile("stickers/More-Stickers.lua")
@@ -1376,6 +1377,25 @@ LMG2L["TextBox_19"]["Text"] = ""
 LMG2L["TextBox_19"]["BackgroundTransparency"] = 0.4
 LMG2L["TextBox_19"]["ClipsDescendants"] = true
 
+LMG2L["ScrollToBottomBtn"] = Instance.new("ImageButton", LMG2L["MainFrame_3"])
+LMG2L["ScrollToBottomBtn"]["Name"] = "ScrollToBottomBtn"
+LMG2L["ScrollToBottomBtn"]["Size"] = UDim2.new(0, 30, 0, 30)
+LMG2L["ScrollToBottomBtn"]["Position"] = UDim2.new(0.5, 0, 0, 165)
+LMG2L["ScrollToBottomBtn"]["AnchorPoint"] = Vector2.new(0.5, 0)
+LMG2L["ScrollToBottomBtn"]["BackgroundColor3"] = Color3.fromRGB(51, 51, 51)
+LMG2L["ScrollToBottomBtn"]["BackgroundTransparency"] = 0.4
+LMG2L["ScrollToBottomBtn"]["Image"] = getcustomasset("RBX_Chat/assets/arrow-down.png")
+LMG2L["ScrollToBottomBtn"]["Visible"] = false
+LMG2L["ScrollToBottomBtn"]["ZIndex"] = 5
+LMG2L["ScrollToBottomBtn"]["AutoButtonColor"] = false
+
+LMG2L["ScrollToBottomCorner"] = Instance.new("UICorner", LMG2L["ScrollToBottomBtn"])
+LMG2L["ScrollToBottomCorner"]["CornerRadius"] = UDim.new(1, 0)
+
+LMG2L["ScrollToBottomStroke"] = Instance.new("UIStroke", LMG2L["ScrollToBottomBtn"])
+LMG2L["ScrollToBottomStroke"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
+LMG2L["ScrollToBottomStroke"]["Color"] = Color3.fromRGB(63, 63, 63)
+
 LMG2L["UIStroke_1a"] = Instance.new("UIStroke", LMG2L["TextBox_19"])
 LMG2L["UIStroke_1a"]["ApplyStrokeMode"] = Enum.ApplyStrokeMode.Border
 LMG2L["UIStroke_1a"]["Color"] = Color3.fromRGB(63, 63, 63)
@@ -2029,6 +2049,38 @@ LMG2L["ScrollingFrame_4"]:GetPropertyChangedSignal("CanvasPosition"):Connect(fun
         LMG2L["NewMessagesBtn"].Visible = false
         UnreadMessagesCount = 0
     end
+end)
+
+local updateScrollId = 0
+
+local function UpdateScrollArrow()
+    updateScrollId = updateScrollId + 1
+    local currentId = updateScrollId
+    
+    task.spawn(function()
+        task.wait()
+        
+        if currentId ~= updateScrollId then return end 
+        
+        local ScrollFrame = LMG2L["ScrollingFrame_4"]
+        local MaxScroll = math.max(0, ScrollFrame.AbsoluteCanvasSize.Y - ScrollFrame.AbsoluteWindowSize.Y)
+        
+        if ScrollFrame.CanvasPosition.Y < (MaxScroll - 50) then
+            LMG2L["ScrollToBottomBtn"].Visible = true
+        else
+            LMG2L["ScrollToBottomBtn"].Visible = false
+        end
+    end)
+end
+
+LMG2L["ScrollingFrame_4"]:GetPropertyChangedSignal("CanvasPosition"):Connect(UpdateScrollArrow)
+LMG2L["ScrollingFrame_4"]:GetPropertyChangedSignal("AbsoluteCanvasSize"):Connect(UpdateScrollArrow)
+
+LMG2L["ScrollToBottomBtn"].MouseButton1Click:Connect(function()
+    local ScrollFrame = LMG2L["ScrollingFrame_4"]
+    local MaxScroll = math.max(0, ScrollFrame.AbsoluteCanvasSize.Y - ScrollFrame.AbsoluteWindowSize.Y)
+    
+    ScrollFrame.CanvasPosition = Vector2.new(0, MaxScroll)
 end)
 
 local function ConnectWebSocket()
