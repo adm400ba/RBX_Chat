@@ -254,9 +254,6 @@ function UILibrary:CreateAudioPlayer(id, title, parent)
 
     selfAudio.Play = function()
         if not isPlaying then
-            if not snd.IsLoaded then
-                snd.Loaded:Wait()
-            end
             snd:Resume()
             pBtn.Image = getcustomasset("RBX_Chat/assets/circle-pause.png")
             isPlaying = true
@@ -535,9 +532,6 @@ function UILibrary:CreateYouTubeAudioPlayer(url, parent)
 
     selfAudio.Play = function()
         if not isPlaying and isDownloaded then
-            if not snd.IsLoaded then
-                snd.Loaded:Wait()
-            end
             snd:Resume()
             pBtn.Image = getcustomasset("RBX_Chat/assets/circle-pause.png")
             isPlaying = true
