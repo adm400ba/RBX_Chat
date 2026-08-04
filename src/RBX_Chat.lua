@@ -1830,7 +1830,8 @@ local function ReceiveMessage(username, userId, text, timestamp)
     NewMessage.Thumbnail.Image = "rbxthumb://type=AvatarHeadShot&id=" .. tostring(userId) .. "&w=420&h=420"
 
     if timestamp then
-        local utc = DateTime.fromIsoDate(timestamp)
+        local utc = DateTime.fromUnixTimestamp(timestamp)
+        
         local localTime = utc:ToLocalTime()
         NewMessage.Username.Time.Text = string.format("%02d:%02d", localTime.Hour, localTime.Minute)
     else
@@ -1973,7 +1974,7 @@ local function ReceiveMessage(username, userId, text, timestamp)
         if not IsMyMessage then
             UnreadMessagesCount = UnreadMessagesCount + 1
             if UnreadMessagesCount == 1 then
-                FirstUnreadTime = timestamp and os.date("%H:%M", DateTime.fromIsoDate(timestamp):UnixTimestamp()) or os.date("%H:%M")
+                FirstUnreadTime = timestamp and os.date("%H:%M", DateTime.fromUnixTimestamp(timestamp).UnixTimestamp) or os.date("%H:%M")
             end
             
             if UnreadMessagesCount == 1 then
