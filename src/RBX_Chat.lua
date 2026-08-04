@@ -1814,6 +1814,12 @@ task.spawn(function()
 end)
 
 local function ReceiveMessage(username, userId, text, timestamp)
+    
+    if type(timestamp) == "string" then
+        local parsedDate = DateTime.fromIsoDate(timestamp)
+        timestamp = parsedDate and parsedDate.UnixTimestamp or nil
+    end
+    
     local NewMessage = MessageTemplate:Clone()
     
     local rawForSearch = text
@@ -2222,7 +2228,7 @@ LMG2L["SendMessage_1c"].MouseButton1Click:Connect(function()
                 username = Player.DisplayName,
                 userId = Player.UserId,
                 text = Text,
-                timestamp = DateTime.now():ToIsoDate()
+                timestamp = DateTime.now().UnixTimestamp
             }
             
             local success, err = pcall(function()
@@ -2241,7 +2247,7 @@ LMG2L["SendMessage_1c"].MouseButton1Click:Connect(function()
         else
             LMG2L["Loading_17"]["Visible"] = false
             SendNotification("RBX Chat", "Modo Offline ativo. Servidor indisponível.", 3, getcustomasset("RBX_Chat/assets/message-square-more.png"))
-            ReceiveMessage(Player.DisplayName, Player.UserId, Text, DateTime.now():ToIsoDate())
+            ReceiveMessage(Player.DisplayName, Player.UserId, Text, DateTime.now().UnixTimestamp)
         end
         
         LMG2L["TextBox_19"].Text = ""
