@@ -226,9 +226,10 @@ function UILibrary:CreateAudioPlayer(id, title, parent)
     local function updateScrub(xPos)
         local rel = math.clamp((xPos - barBg.AbsolutePosition.X) / barBg.AbsoluteSize.X, 0, 1)
         if snd.IsLoaded and snd.TimeLength > 0 then
-            snd.TimePosition = rel * snd.TimeLength
+            local newTime = rel * snd.TimeLength
+            snd.TimePosition = newTime
             barFill.Size = UDim2.new(rel, 0, 1, 0)
-            timeLbl.Text = formatTime(snd.TimePosition)
+            timeLbl.Text = formatTime(newTime)
         end
     end
 
@@ -313,8 +314,6 @@ function UILibrary:CreateAudioPlayer(id, title, parent)
             if isPlaying and not dragging then
                 barFill.Size = UDim2.new(snd.TimePosition / snd.TimeLength, 0, 1, 0)
                 timeLbl.Text = formatTime(snd.TimePosition)
-            elseif not isPlaying and not dragging and barFill.Size.X.Scale == 0 then
-                timeLbl.Text = formatTime(snd.TimeLength)
             end
         end
     end))
@@ -504,9 +503,10 @@ function UILibrary:CreateYouTubeAudioPlayer(url, parent)
     local function updateScrub(xPos)
         local rel = math.clamp((xPos - barBg.AbsolutePosition.X) / barBg.AbsoluteSize.X, 0, 1)
         if snd.IsLoaded and snd.TimeLength > 0 then
-            snd.TimePosition = rel * snd.TimeLength
+            local newTime = rel * snd.TimeLength
+            snd.TimePosition = newTime
             barFill.Size = UDim2.new(rel, 0, 1, 0)
-            timeLbl.Text = formatTime(snd.TimePosition)
+            timeLbl.Text = formatTime(newTime)
         end
     end
 
@@ -637,8 +637,6 @@ function UILibrary:CreateYouTubeAudioPlayer(url, parent)
             if isPlaying and not dragging then
                 barFill.Size = UDim2.new(snd.TimePosition / snd.TimeLength, 0, 1, 0)
                 timeLbl.Text = formatTime(snd.TimePosition)
-            elseif not isPlaying and not dragging and barFill.Size.X.Scale == 0 then
-                timeLbl.Text = formatTime(snd.TimeLength)
             end
         end
     end))
