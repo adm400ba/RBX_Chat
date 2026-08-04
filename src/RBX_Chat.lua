@@ -245,19 +245,19 @@ function UILibrary:CreateAudioPlayer(id, title, parent)
     end
 
     selfAudio.Stop = function()
-        snd:Pause()
-        snd.TimePosition = 0
-        pBtn.Image = getcustomasset("RBX_Chat/assets/circle-play.png")
-        isPlaying = false
-        barFill.Size = UDim2.new(0, 0, 1, 0)
-        timeLbl.Text = formatTime(snd.TimeLength)
+    snd:Pause()
+    snd.TimePosition = 0
+    pBtn.Image = getcustomasset("RBX_Chat/assets/circle-play.png")
+    isPlaying = false
+    barFill.Size = UDim2.new(0, 0, 1, 0)
+    timeLbl.Text = formatTime(0)
     end
 
     selfAudio.Play = function()
-        if not isPlaying then
-            snd:Resume()
-            pBtn.Image = getcustomasset("RBX_Chat/assets/circle-pause.png")
-            isPlaying = true
+    if not isPlaying then
+        snd:Play()
+        pBtn.Image = getcustomasset("RBX_Chat/assets/circle-pause.png")
+        isPlaying = true
         end
     end
 
@@ -281,13 +281,13 @@ function UILibrary:CreateAudioPlayer(id, title, parent)
     end)
 
     table.insert(conns, snd.Ended:Connect(function()
-        isPlaying = false
-        pBtn.Image = getcustomasset("RBX_Chat/assets/circle-play.png")
-        barFill.Size = UDim2.new(0, 0, 1, 0)
-        timeLbl.Text = formatTime(snd.TimeLength)
-        if getgenv().ActiveChatAudio == selfAudio then
-            getgenv().ActiveChatAudio = nil
-        end
+    isPlaying = false
+    pBtn.Image = getcustomasset("RBX_Chat/assets/circle-play.png")
+    barFill.Size = UDim2.new(0, 0, 1, 0)
+    timeLbl.Text = formatTime(0)
+    if getgenv().ActiveChatAudio == selfAudio then
+        getgenv().ActiveChatAudio = nil
+    end
     end))
 
     barBg.InputBegan:Connect(function(input)
@@ -310,12 +310,12 @@ function UILibrary:CreateAudioPlayer(id, title, parent)
     end))
 
     table.insert(conns, RunService.RenderStepped:Connect(function()
-        if snd.IsLoaded and snd.TimeLength > 0 then
-            if isPlaying and not dragging then
-                barFill.Size = UDim2.new(snd.TimePosition / snd.TimeLength, 0, 1, 0)
-                timeLbl.Text = formatTime(snd.TimePosition)
-            end
+    if snd.IsLoaded and snd.TimeLength > 0 then
+        if not dragging then
+            barFill.Size = UDim2.new(snd.TimePosition / snd.TimeLength, 0, 1, 0)
+            timeLbl.Text = formatTime(snd.TimePosition)
         end
+    end
     end))
 
     aFrame.Destroying:Connect(function()
@@ -522,20 +522,20 @@ function UILibrary:CreateYouTubeAudioPlayer(url, parent)
     end
 
     selfAudio.Stop = function()
-        snd:Pause()
-        snd.TimePosition = 0
-        pBtn.Image = getcustomasset("RBX_Chat/assets/circle-play.png")
-        isPlaying = false
-        barFill.Size = UDim2.new(0, 0, 1, 0)
-        timeLbl.Text = formatTime(snd.TimeLength)
+    snd:Pause()
+    snd.TimePosition = 0
+    pBtn.Image = getcustomasset("RBX_Chat/assets/circle-play.png")
+    isPlaying = false
+    barFill.Size = UDim2.new(0, 0, 1, 0)
+    timeLbl.Text = formatTime(0)
     end
 
     selfAudio.Play = function()
-        if not isPlaying and isDownloaded then
-            snd:Resume()
-            pBtn.Image = getcustomasset("RBX_Chat/assets/circle-pause.png")
-            isPlaying = true
-        end
+    if not isPlaying and isDownloaded then
+        snd:Play()
+        pBtn.Image = getcustomasset("RBX_Chat/assets/circle-pause.png")
+        isPlaying = true
+    end
     end
 
     selfAudio.GetTimeText = function()
@@ -601,13 +601,13 @@ function UILibrary:CreateYouTubeAudioPlayer(url, parent)
     end)
 
     table.insert(conns, snd.Ended:Connect(function()
-        isPlaying = false
-        pBtn.Image = getcustomasset("RBX_Chat/assets/circle-play.png")
-        barFill.Size = UDim2.new(0, 0, 1, 0)
-        timeLbl.Text = formatTime(snd.TimeLength)
-        if getgenv().ActiveChatAudio == selfAudio then
-            getgenv().ActiveChatAudio = nil
-        end
+    isPlaying = false
+    pBtn.Image = getcustomasset("RBX_Chat/assets/circle-play.png")
+    barFill.Size = UDim2.new(0, 0, 1, 0)
+    timeLbl.Text = formatTime(0)
+    if getgenv().ActiveChatAudio == selfAudio then
+        getgenv().ActiveChatAudio = nil
+    end
     end))
 
     barBg.InputBegan:Connect(function(input)
@@ -634,7 +634,7 @@ function UILibrary:CreateYouTubeAudioPlayer(url, parent)
             loadingImg.Rotation = loadingImg.Rotation + 5
         end
         if isDownloaded and snd.IsLoaded and snd.TimeLength > 0 then
-            if isPlaying and not dragging then
+            if not dragging then
                 barFill.Size = UDim2.new(snd.TimePosition / snd.TimeLength, 0, 1, 0)
                 timeLbl.Text = formatTime(snd.TimePosition)
             end
